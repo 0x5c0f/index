@@ -39,7 +39,7 @@ const PAGES_DATA = [
     title: "ChatGPT-Web",
     subtitle: "一个曾经的小码农...",
     url: "https://vchat.51ac.cc",
-    icon: "https://blog.0x5c0f.cc/icons/logo_title.png",
+    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
   },
 ];
 

@@ -28,7 +28,7 @@ const PAGES_DATA = [
   {
     pageId: 2,
     sortId: 2,
-    title: "博客",
+    title: "我的博客",
     subtitle: "一个曾经的小码农...",
     url: "https://blog.0x5c0f.cc",
     icon: "https://blog.0x5c0f.cc/icons/logo_title.png",

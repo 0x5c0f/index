@@ -99,7 +99,15 @@ export default {
   },
   computed: {
     recordNumber() {
-      return this.$config.RECORD_NUMBER;
+      const __hostname = window.location.hostname 
+      if ( __hostname === '51ac.cc') {
+        return this.$config.RECORD_NUMBER_51AC;
+      } else if( __hostname === '0x5c0f.cc' ){
+        return this.$config.RECORD_NUMBER_5C0F;
+      }else{
+        return "";
+      }
+      // return this.$config.RECORD_NUMBER;
     }
   },
   methods: {

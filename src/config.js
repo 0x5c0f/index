@@ -7,7 +7,8 @@ const GITHUB = "https://github.com/0x5c0f";
 
 const BACKGROUND_IMG_URL = "https://tools.0x5c0f.cc/img/bg-default.png";
 
-const RECORD_NUMBER = "渝ICP备2020011834号-2";
+const RECORD_NUMBER_5C0F = "渝ICP备2020011834号-2";
+const RECORD_NUMBER_51AC = "";
 
 const SORT_DATA = [
   { sortId: 1, title: "我的主页" },
@@ -60,6 +61,7 @@ export default {
   SLOGAN,
   GITHUB,
   BACKGROUND_IMG_URL,
-  RECORD_NUMBER
+  RECORD_NUMBER_5C0F,
+  RECORD_NUMBER_51AC
 };
 

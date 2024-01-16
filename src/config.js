@@ -13,7 +13,8 @@ const RECORD_NUMBER_51AC = "";
 const SORT_DATA = [
   { sortId: 1, title: "我的主页" },
   { sortId: 2, title: "博客" },
-  { sortId: 3 , title: "AI工具" },
+  { sortId: 3 , title: "工具箱" },
+  { sortId: 4 , title: "其他" },
 ];
 
 
@@ -27,7 +28,7 @@ const PAGES_DATA = [
     icon: "https://tools.0x5c0f.cc/img/logo_large.png",
   },
   {
-    pageId: 2,
+    pageId: 1,
     sortId: 2,
     title: "我的博客",
     subtitle: "一个曾经的小码农...",
@@ -35,11 +36,43 @@ const PAGES_DATA = [
     icon: "https://blog.0x5c0f.cc/icons/logo_title.png",
   },
   {
+    pageId: 2,
+    sortId: 2,
+    title: "Waline 评论系统",
+    subtitle: "官网 - https://waline.js.org",
+    url: "https://talk.51ac.cc",
+    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
+  },
+  {
+    pageId: 1,
+    sortId: 3,
+    title: "tldraw 绘图",
+    subtitle: "官网 - https://www.tldraw.com/",
+    url: "https://tldraw.51ac.cc",
+    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
+  },
+  {
+    pageId: 2,
+    sortId: 3,
+    title: "Excalidraw+ 绘图",
+    subtitle: "官网 - https://excalidraw.com",
+    url: "https://ed.51ac.cc",
+    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
+  },
+  {
     pageId: 3,
     sortId: 3,
-    title: "ChatGPT-Web",
-    subtitle: "一个曾经的小码农...",
-    url: "https://vchat.51ac.cc",
+    title: "IP 工具箱",
+    subtitle: "官网 - https://ipcheck.ing",
+    url: "https://ip.51ac.cc/",
+    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
+  },
+  {
+    pageId: 1,
+    sortId: 4,
+    title: "ChatGPT-Api",
+    subtitle: "ChatGPT-Api vercel 代理",
+    url: "https://vapi.51ac.cc/",
     icon: "https://tools.0x5c0f.cc/img/logo_large.png",
   },
 ];

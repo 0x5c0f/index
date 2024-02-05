@@ -46,9 +46,9 @@ const PAGES_DATA = [
   {
     pageId: 1,
     sortId: 3,
-    title: "tldraw 绘图",
+    title: "tldraw 绘图(Vercel转发)",
     subtitle: "官网 - https://www.tldraw.com/",
-    url: "https://tldraw.51ac.cc",
+    url: "https://tld.51ac.cc",
     icon: "https://tools.0x5c0f.cc/img/logo_large.png",
   },
   {

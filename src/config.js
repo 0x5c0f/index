@@ -36,14 +36,6 @@ const PAGES_DATA = [
     icon: "https://blog.0x5c0f.cc/icons/logo_title.png",
   },
   {
-    pageId: 2,
-    sortId: 2,
-    title: "Waline 评论系统",
-    subtitle: "官网 - https://waline.js.org",
-    url: "https://talk.51ac.cc",
-    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
-  },
-  {
     pageId: 1,
     sortId: 3,
     title: "tldraw 绘图(Vercel转发)",
@@ -57,14 +49,6 @@ const PAGES_DATA = [
     title: "Excalidraw+ 绘图",
     subtitle: "官网 - https://excalidraw.com",
     url: "https://ed.51ac.cc",
-    icon: "https://tools.0x5c0f.cc/img/logo_large.png",
-  },
-  {
-    pageId: 3,
-    sortId: 3,
-    title: "IP 工具箱",
-    subtitle: "官网 - https://ipcheck.ing",
-    url: "https://ip.51ac.cc/",
     icon: "https://tools.0x5c0f.cc/img/logo_large.png",
   },
   {

@@ -146,7 +146,8 @@ function handleBeian() {
   const beianEl = document.getElementById('beian');
 
   if (beianEl && domain.indexOf('tools.0x5c0f.cc') === -1) {
-    beianEl.style.display = 'none';
+    // 备案信息在本地环境也显示
+    // beianEl.style.display = 'none';
   }
 }
 

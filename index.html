@@ -1,361 +1,89 @@
-<!doctype html>
-<html class="no-js" lang="ch">
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0x5c0f - 个人主页</title>
+  <meta name="description" content="0x5c0f 的个人主页">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <!-- 加载动画 -->
+  <div id="loader-wrapper">
+    <div class="loader">
+      <div class="loader-circle"></div>
+      <div class="loader-text">
+        <span class="site-name">0x5c0f</span>
+        <span class="tip">加载中</span>
+      </div>
+    </div>
+    <div class="loader-section section-left"></div>
+    <div class="loader-section section-right"></div>
+  </div>
 
-        <title>一个曾经的小码农...</title>
-		
-        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, user-scalable=0">
-        <link rel="stylesheet" href="./css/normalize.css">        
-        
+  <!-- 粒子背景 -->
+  <div class="particles" id="particles"></div>
 
-        <link rel="stylesheet" href="./css/pageloader.css">
-        <link rel="stylesheet" href="./fonts/opensans/stylesheet.css">
-        <link rel="stylesheet" href="./fonts/asap/stylesheet.css">
-        <link rel="stylesheet" href="./css/ionicons.min.css">
-        
-        <link rel="stylesheet" href="./css/foundation.min.css">
-        <link rel="stylesheet" href="./js/vendor/jquery.fullPage.css">
-        <link rel="stylesheet" href="./js/vegas/vegas.min.css">
-        
-        <link rel="stylesheet" href="./css/main.css">
-        <link rel="stylesheet" href="./css/main_responsive.css">
-        <link rel="stylesheet" href="./css/style-font1.css">
-        
-        <script src="./js/vendor/modernizr-2.7.1.min.js"></script>
-    </head>
-    <body id="menu" class="alt-bg">
-        <!--[if lt IE 8]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        
-        <div class="page-loader" id="page-loader">
-            <div><i class="ion ion-loading-d"></i><p>loading</p></div>
+  <!-- 主页面 -->
+  <div id="main">
+    <div class="card">
+      <!-- 头部 -->
+      <div class="header">
+        <div class="avatar">
+          <img src="img/logo_avatar.png" alt="0x5c0f 的头像" loading="lazy">
         </div>
-        
-		<header class="header-top">
-			<div class="logo">
-				<a href="#home">
-					<img src="img/logo_large.png" alt="Logo 0x5c0f">
-				</a>
-			</div>
-            <div class="menu clearfix">
-                <a href="#about-us">关于我</a>
-                <a href="#contact">联系我</a>
-            </div>
-		</header>
-		<nav class="quick-link count-5 nav-left">
-			<ul id="qmenu">
-				<li data-menuanchor="home">
-					<a href="#home" class=""><i class="icon ion ion-home"></i>
-					</a>
-					<span class="title">首页</span>
-				</li>
-				<li data-menuanchor="when">
-					<a href="#when" class=""><i class="icon ion ion-android-alarm"></i>
-					</a>
-					<span class="title">准备中</span>
-				</li>
-				<li data-menuanchor="about-us">
-					<a href="#about-us"><i class="icon ion ion-android-information"></i>
-					</a>
-					<span class="title">关于我</span>
-				</li>
-				<li data-menuanchor="contact">
-					<a href="#contact"><i class="icon ion ion-android-call"></i>
-					</a>
-					<span class="title">个人信息</span>
-				</li>
-				<li data-menuanchor="contact">
-					<a href="#contact/message"><i class="icon ion ion-email"></i>
-					</a>
-					<span class="title">写信给我</span>
-				</li>
-			</ul>
-		</nav>
+        <p class="bio">一个曾经的小码农...</p>
+      </div>
 
+      <!-- 时间 -->
+      <div class="time-section">
+        <div class="time" id="time">00:00</div>
+        <div class="date" id="date">加载中...</div>
+      </div>
 
-        <div class="page-cover" id="home">
-            <!-- Cover Background -->
-            <div class="cover-bg pos-abs full-size bg-img" data-image-src="img/bg-default.jpg"></div>
-			
-            <!-- <div class="cover-bg pos-abs full-size slide-show">
-				<i class='img' data-src='./img/05.png'></i>
-				<i class='img' data-src='./img/03.jpg'></i>
-			</div> -->
-            
-            <!-- <div id="container" class="video-container show-for-medium-up">
-                <video autoplay="autoplay" loop="loop" autobuffer="autobuffer" muted="muted"
-                       width="640" height="360">
-                    <source src="./00000.mp4" type="video/mp4">
-                </video>
-            </div> -->
-			
-			<!-- Solid color as background -->
-<!--            <div class="cover-bg pos-abs full-size bg-color" data-bgcolor="rgba(51, 2, 48, 0.12)"></div>-->
-			
-			<!-- Solid color as filter -->
-<!--            <div class="cover-bg-mask pos-abs full-size bg-color" data-bgcolor="rgba(62, 24, 219, 0.41)"></div>-->
-            
-        </div>
+      <!-- 一言 -->
+      <div class="quote-section">
+        <p class="quote" id="quote">「加载中...」</p>
+      </div>
 
-        <main class="page-main" id="mainpage">             
-			<div class="section page-home page page-cent" id="s-home">
-				<div class="logo-container">
-					<img class="h-logo" src="img/logo_avatar.png" alt="Logo">
-				</div>
+      <!-- 链接 -->
+      <div class="links-section">
+        <a href="mailto:mail@0x5c0f.cc" class="link-item" title="发送邮件">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+          </svg>
+          <span>邮箱</span>
+        </a>
+        <a href="https://blog.0x5c0f.cc" class="link-item" target="_blank" rel="noopener noreferrer" title="访问博客">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          <span>博客</span>
+        </a>
+        <a href="https://github.com/0x5c0f" class="link-item" target="_blank" rel="noopener noreferrer" title="GitHub 主页">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
 
-				<section class="content">
-					
-					<header class="header">
-						<div class="h-left">
-							<h2>新的 <strong><a class="nocolor" href="https://blog.0x5c0f.cc">起点</a></strong></h2>
-						</div>
-						<div class="h-right">
-							<h3>新的 <br>世界</h3>
-							<h4 class="subhead"><a href="#when">敬请期待</a></h4>
-						</div>
-					</header>
-				</section>
-				
-                <footer class="p-footer p-scrolldown">
-                    <a href="#when">
-                        <div class="arrow-d">
-							<div class="before">Tell&nbsp;me</div>
-							<div class="after">When</div>
-							<div class="circle"></div>
-						</div>
-                    </a>                        
-                </footer>
-			</div>
+      <!-- 页脚 -->
+      <div class="footer" id="beian">
+        <p>
+          <a href="https://beian.mps.gov.cn/#/query/webSearch?code=50010602503871" rel="noreferrer" target="_blank">
+            <img src="img/gov.png" alt="公安备案" class="gov-icon">
+            渝公网安备 50010602503871
+          </a>
+        </p>
+        <p><a href="http://beian.miit.gov.cn" target="_blank">渝ICP备2020011834号-2</a></p>
+      </div>
+    </div>
+  </div>
 
-            <div class="section page-when page page-cent" id="s-when">
-                <section class="content">
-                    <div class="clock clock-countdown">
-						<div class="site-config"
-							 data-date="10/01/2022 23:00:00" 
-							 data-date-timezone="+0"
-							 ></div>
-						<header class="header">
-							<a class="nocolor" href="https://blog.0x5c0f.cc">欢迎来访</a>
-						</header>
-                        <div class="elem-left">
-                            <div class="digit hours">00</div>
-                            <div class="text">hrs</div>
-                        </div>						
-                        <div class="elem-center">
-							<!-- <span class="text top">我看到的世界,你们、看不到！</span> -->
-							<span class="text top"><img class="img" alt="Logo" src="img/logo_large.png"></span>
-                            <div class="digit days">000</div>
-                            <div class="text">days</div>
-                        </div>
-                        <div class=" elem-right">
-                            <div class="digit minutes">00</div>
-                            <div class="text">min</div>
-                        </div>
-						
-						<div class="second">
-							<input class="knob container" 
-								   id="second-knob"
-								  	data-width="400"
-								  	data-height="400"
-								 data-displayInput=false
-									data-fgColor="#fff"
-									data-bgColor="rgba(255,255,255,0)"
-									data-thickness=".07"
-								 	value="0"
-									data-displayPrevious=true
-								   data-max="6000"
-								   />
-						</div>
-                    </div>                   
-                    
-                </section>                
-			<footer class="p-footer p-scrolldown">
-				<a href="#about-us">
-					<div class="arrow-d">
-						<div class="before">About</div>
-						<div class="after">Lorem</div>
-						<div class="circle"></div>
-					</div>
-				</a>
-			</footer>
-            </div>
-            
-            <div class="section page-about page page-cent" id="s-about-us">
-                <section class="content">
-                    <header class="p-title">
-                        <h3>关于我<i class="ion ion-android-information">
-                            </i>
-                        </h3>
-						<h2>我看到的世界，</br>你们、看不到！</h2>
-                    </header>
-                    <article class="text">
-                        <p>又一天过去了，今天过得怎么样，梦想是不是更远了！</p>
-                    </article>
-                </section>
-                <footer class="p-footer p-scrolldown">
-                    <a href="#contact">
-                        <div class="arrow-d">
-							<div class="before">Contact</div>
-							<div class="after">Message</div>
-							<div class="circle"></div>
-						</div>
-                    </a>                        
-                </footer>
-            </div>
-                
-            <div class="section page-contact page page-cent  bg-color" data-bgcolor="rgba(95, 25, 208, 0.88)s" id="s-contact">
-				<div class="slide" id="information" data-anchor="information">
-					<section class="content">
-						<header class="p-title">
-							<h3>联系方式<i class="ion ion-location">
-								</i>
-							</h3>
-							<ul class="buttons">
-								<li class="show-for-medium-up">
-									<a title="关于我" href="#about-us" ><i class="ion ion-android-information"></i></a>
-								</li>
-								<li>
-									<a title="联系我" href="#contact/message"><i class="ion ion-email"></i></a>
-								</li>
-							</ul>
-						</header>
-						<div class="contact">
-							<div class="row">
-								<div class="medium-5 columns left">
-									<ul>
-										<li>
-											<h4>Email</h4>
-											<p><a href="mailto://mail@0x5c0f.cc">mail@0x5c0f.cc</a></p>
-										</li>
-										<li>
-											<h4>Address</h4>
-											<p>新世界</p>
-										</li>
-										<li>
-											<h4>Phone</h4>
-											<p>+00 000 0000 0000</p>
-										</li>
-									</ul>
-								</div>
-								<div class="medium-5 columns social-links right">
-									<ul>
-
-										<li class="show-for-medium-up">
-											<h4>Website</h4>
-											<p><a href="https://blog.0x5c0f.cc">blog.0x5c0f.cc</a></p>
-										</li>
-										<li  class="show-for-medium-up">
-											<h4>Find me on</h4>
-											<div class="socialnet">
-												<a href="https://github.com/0x5c0f"><i class="ion ion-social-github"></i></a>
-											</div>
-										</li>
-										<li>
-											<p><img src="img/logo_large.png" alt="Logo" class="logo"></p>
-											<p class="small">Powered By <strong><a href="https://tools.0x5c0f.cc">0x5c0f</a></strong></p>
-										</li>
-									</ul>
-
-								</div>
-							</div>
-						</div>
-					</section>  
-				</div>
-				
-				<div class="slide" id="message" data-anchor="message">
-					<section class="content">
-						<header class="p-title">
-							<h3>联系我<i class="ion ion-email">
-								</i>
-							</h3>
-							<ul class="buttons">
-								<li class="show-for-medium-up">
-									<a title="About" href="#about-us"><i class="ion ion-android-information"></i></a>
-								</li>
-								<li>
-									<a title="Contact" href="#contact/information"><i class="ion ion-location"></i></a>
-								</li>
-							</ul>
-						</header>
-						
-						<div class="page-block c-right v-zoomIn">
-							<div class="wrapper">
-								<div>
-									<form class="message form send_message_form" method="post" action="">
-										<div class="fields clearfix">
-											<div class="input">
-												<label for="mes-name">Name </label>
-												<input id="mes-name" name="name" type="text" placeholder="Your Name" required></div>
-											<div class="buttons">
-												<button id="submit-message" class="button email_b" name="submit_message">Ok</button>
-											</div>
-										</div>
-										<div class="fields clearfix">
-											<div class="input">
-												<label for="mes-email">Email </label>
-												<input id="mes-email" type="email" placeholder="Email Address" name="email" required>
-											</div>
-										</div>
-										<div class="fields clearfix no-border">
-											<label for="mes-text">Message </label>
-											<textarea id="mes-text" placeholder="Message ..." name="message" required></textarea>
-
-											<div>
-												<p class="message-ok invisible">Your message has been sent, thank you.</p>
-											</div>
-										</div>
-									</form>
-								</div>
-							</div>
-						</div>
-					</section>
-						
-				</div>
-            </div>
-        
-        </main>
-
-		
-		<footer class="page-footer" id='beian'>
-			<span>
-				<a href="https://beian.mps.gov.cn/#/query/webSearch?code=50010602503871" rel="noreferrer" target="_blank">
-					<img src="/img/gov.png" style="width: auto;height: 22px;"/>   
-					渝公网安备 50010602503871
-				</a>
-			</span>
-			<span><a href="http://beian.miit.gov.cn" target="_blank">渝ICP备2020011834号-2</a>
-			</span>
-		</footer>
-
-<!-- -->
-<script>
-    // 获取当前页面的域名
-    var domain = window.location.hostname;
-
-    // 如果域名不包含 "tools.0x5c0f.cc"，则隐藏页面底部
-    if (domain.indexOf("tools.0x5c0f.cc") === -1) {
-        document.getElementById("beian").style.display = "none";
-    }
-</script>
-
-<!-- -->
-
-
-
-        <script src="./js/vendor/jquery-1.11.2.min.js"></script>
-        <script src="./js/vendor/all.js"></script>
-		
-        <script src="./js/jquery.downCount.js"></script>
-		
-        <script src="./js/form_script.js"></script>
-        
-        <script src="./js/main.js"></script>
-
-        <script src="./js/pcheck.js"></script>
-
-
-    </body>
+  <script src="js/main.js"></script>
+</body>
 </html>

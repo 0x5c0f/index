@@ -1,188 +1,176 @@
-"use strict";
-/* 0. Initialization */
-// Avoid `console` errors in browsers that lack a console.
-(function() {
-    var method;
-    var noop = function () {};
-    var methods = [
-        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
-        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
-        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
-        'timeStamp', 'trace', 'warn'
-    ];
-    var length = methods.length;
-    var console = (window.console = window.console || {});
+/**
+ * 0x5c0f 个人主页 - 主脚本
+ */
 
-    while (length--) {
-        method = methods[length];
+// 配置
+const CONFIG = {
+  siteName: '0x5c0f',
+  quotes: [
+    '「又一天过去了，梦想是不是更远了？」',
+    '「生活的理想，就是为了理想的生活。」',
+    '「人生的价值，并不是用时间，而是用深度去衡量的。」',
+    '「世界上只有一种英雄主义，就是看清生活的真相之后依然热爱生活。」',
+    '「你若要喜爱你自己的价值，你就得给世界创造价值。」',
+    '「人生应该如蜡烛一样，从顶燃到底，一直都是光明的。」',
+    '「一个人的价值，应该看他贡献什么，而不应当看他取得什么。」',
+    '「人只有献身于社会，才能找出那短暂而有风险的生命的意义。」',
+    '「芸芸众生，孰不爱生？爱生之极，进而爱群。」'
+  ],
+  particleCount: 30,
+  quoteInterval: 30000 // 30秒
+};
 
-        // Only stub undefined methods.
-        if (!console[method]) {
-            console[method] = noop;
-        }
-    }
-}());
+// 状态
+let lastTime = '';
+let currentQuoteIndex = 0;
 
-// Get height on Window resized
-$(window).on('resize',function(){
-    var slideHeight = $('.slick-track').innerHeight();
-	return false;
-});
+/**
+ * 初始化粒子背景
+ */
+function initParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
 
-
-// Smooth scroll <a> links 
-var $root = $('html, body');
-$('a.s-scroll').on('click',function() {
-    var href = $.attr(this, 'href');
-    $root.animate({
-        scrollTop: $(href).offset().top
-    }, 500, function () {
-        window.location.hash = href;
-    });
-    return false;
-});
-
-
-// Page Loader : hide loader when all are loaded
-$(window).load(function(){
-    $('#page-loader').addClass('hidden');
-});
-
-
-/* 1. Clock attribute */
-
-var dateReadableText = 'Upcoming date';
-    if($('.site-config').attr('data-date-readable') && ($('.site-config').attr('data-date-readable') != '')){
-        $('.timeout-day').text('');
-        dateReadableText = $('.site-config').attr('data-date-readable');        
-        $('.timeout-day').text(dateReadableText);
-    }
-$('.clock-countdown').downCount({
-    date: $('.site-config').attr('data-date'),
-    offset: +10
-}, function () {
-    //callback here if finished
-    //alert('YES, done!');
-    var zerodayText = 'An upcoming date';
-    if($('.site-config').attr('data-zeroday-text') && ($('.site-config').attr('data-zeroday-text') != '')){
-        $('.timeout-day').text('');
-        zerodayText = $('.site-config').attr('data-zeroday-text'); 
-    }
-    $('.timeout-day').text(zerodayText);
-});
-
-/* Second */
-$(function() {
-	$("#second-knob").knob();
-});
-
-
-/* 2. Background for page / section */
-
-var background = '#ccc';
-var backgroundMask = 'rgba(255,255,255,0.92)';
-var backgroundVideoUrl = 'none';
-
-/* Background image as data attribut */
-var list = $('.bg-img');
-
-for (var i = 0; i < list.length; i++) {
-	var src = list[i].getAttribute('data-image-src');
-	list[i].style.backgroundImage = "url('" + src + "')";
-	list[i].style.backgroundRepeat = "no-repeat";
-	list[i].style.backgroundPosition = "center";
-	list[i].style.backgroundSize = "cover";
+  for (let i = 0; i < CONFIG.particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    particle.style.animationDelay = Math.random() * 10 + 's';
+    particle.style.width = (Math.random() * 4 + 2) + 'px';
+    particle.style.height = particle.style.width;
+    container.appendChild(particle);
+  }
 }
 
-/* Background color as data attribut */
-var list = $('.bg-color');
-for (var i = 0; i < list.length; i++) {
-	var src = list[i].getAttribute('data-bgcolor');
-	list[i].style.backgroundColor = src;
-}
+/**
+ * 初始化加载动画
+ */
+function initLoader() {
+  setTimeout(() => {
+    const loader = document.getElementById('loader-wrapper');
+    const card = document.querySelector('.card');
 
-/* Background slide show */
-var imageList = $('.slide-show .img');
-var imageSlides = [];
-for (var i = 0; i < imageList.length; i++) {
-	var src = imageList[i].getAttribute('data-src');
-	imageSlides.push({src: src});
-}
-$(function() {
-    $('.slide-show').vegas({
-        delay: 5000,
-        shuffle: true,
-        slides: imageSlides,
-    	//transition: [ 'zoomOut', 'burn' ],
-		animation: [ 'kenburnsUp', 'kenburnsDown', 'kenburnsLeft', 'kenburnsRight' ]
-    });
-});
-
-/* Static video background **/
-$(function(){
-	// Helper function to Fill and Center the HTML5 Video
-	$('.video-container video, .video-container object').maximage('maxcover');
-});
-/** youtube / vimeo background */
-$(function(){
-    if(backgroundVideoUrl != 'none'){
-        
-        //disable video background for smallscreen
-        if($(window).width() > 640){
-          $.okvideo({ source: backgroundVideoUrl,
-                    adproof: true
-                    });
-        }
+    if (loader) {
+      loader.classList.add('loaded');
     }
-});
 
-/* 3. Slide */
-var isSlide = false;
-var slideElem = $('.slide');
-var arrowElem = $('.p-footer .arrow-d');
-var pageElem = $('.page');
-/** Init fullpage.js */
-$(document).ready(function() {
-    $('#mainpage').fullpage({
-		menu: '#qmenu',
-		anchors: ['home', 'when', 'about-us', 'contact'],
-//        verticalCentered: false,
-//        resize : false,
-//		responsive: 900,
-		scrollOverflow: true,
-        css3: false,
-        navigation: true,
-		onLeave: function(index, nextIndex, direction){
-			arrowElem.addClass('gone');
-			pageElem.addClass('transition');
-//			$('.active').removeClass('transition');
-			slideElem.removeClass('transition');
-			isSlide = false;
-		},
-        afterLoad: function(anchorLink, index){
-			arrowElem.removeClass('gone');
-			pageElem.removeClass('transition');
-			if(isSlide){
-				slideElem.removeClass('transition');
-			}
-		},
-		afterSlideLoad: function( anchorLink, index, slideAnchor, slideIndex){
-			slideElem.removeClass('transition');
-			isSlide = true;
-//			$('.slide').addClass('transition');
-        },
-		onSlideLeave: function( anchorLink, index, slideIndex, direction){
-//			$('.slide').removeClass('transition');
-			if(isSlide){
-				slideElem.addClass('transition');
-			}
-        },
-        afterRender: function(){}
-    });
-});
+    setTimeout(() => {
+      if (card) {
+        card.classList.add('visible');
+      }
+    }, 800);
+  }, 2000);
+}
+
+/**
+ * 更新时间显示
+ */
+function updateTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const currentTime = hours + ':' + minutes + ':' + seconds;
+
+  if (currentTime !== lastTime) {
+    const timeEl = document.getElementById('time');
+    if (timeEl) {
+      timeEl.innerHTML = '';
+
+      for (let i = 0; i < currentTime.length; i++) {
+        const span = document.createElement('span');
+        span.className = 'digit';
+        span.textContent = currentTime[i];
+        timeEl.appendChild(span);
+      }
+    }
+
+    lastTime = currentTime;
+  }
+
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+  const weekDay = weekDays[now.getDay()];
+
+  const dateEl = document.getElementById('date');
+  if (dateEl) {
+    dateEl.textContent = year + '年' + month + '月' + day + '日 星期' + weekDay;
+  }
+}
+
+/**
+ * 更新一言（带淡入淡出）
+ */
+function updateQuote(quote) {
+  const quoteEl = document.getElementById('quote');
+  if (!quoteEl) return;
+
+  quoteEl.classList.add('fade-out');
+
+  setTimeout(() => {
+    quoteEl.textContent = quote;
+    quoteEl.classList.remove('fade-out');
+  }, 500);
+}
+
+/**
+ * 从本地数组获取随机一言
+ */
+function getRandomQuote() {
+  currentQuoteIndex = (currentQuoteIndex + 1) % CONFIG.quotes.length;
+  return CONFIG.quotes[currentQuoteIndex];
+}
 
 
-/* Background slide */
+/**
+ * 初始化一言
+ */
+function initQuote() {
+  // 显示本地一言
+  updateQuote(getRandomQuote());
 
+  // 定时更新本地一言
+  setInterval(() => {
+    updateQuote(getRandomQuote());
+  }, CONFIG.quoteInterval);
+}
 
-/* END OF Page Loader : hide loader when all are loaded */
+/**
+ * 处理备案信息显示
+ */
+function handleBeian() {
+  const domain = window.location.hostname;
+  const beianEl = document.getElementById('beian');
+
+  if (beianEl && domain.indexOf('tools.0x5c0f.cc') === -1) {
+    beianEl.style.display = 'none';
+  }
+}
+
+/**
+ * 初始化
+ */
+function init() {
+  initParticles();
+  initLoader();
+
+  // 更新时间
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // 初始化一言
+  initQuote();
+
+  // 处理备案信息
+  handleBeian();
+}
+
+// 页面加载完成后初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

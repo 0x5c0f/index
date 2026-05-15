@@ -125,8 +125,9 @@ function updateQuote(quote) {
  * 从本地数组获取随机一言
  */
 function getRandomQuote() {
+  const quote = CONFIG.quotes[currentQuoteIndex];
   currentQuoteIndex = (currentQuoteIndex + 1) % CONFIG.quotes.length;
-  return CONFIG.quotes[currentQuoteIndex];
+  return quote;
 }
 
 

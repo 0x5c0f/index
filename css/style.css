@@ -239,7 +239,7 @@ body::before {
   height: 120px;
   border-radius: 50%;
   margin: 0 auto 25px;
-  overflow: hidden;
+  position: relative;          /* overflow: hidden 去掉，改为 relative，让绿点能定位在圆圈外沿 */
   background: rgba(255,255,255,0.05);
   border: 2px solid rgba(255,255,255,0.1);
   box-shadow: 0 0 30px rgba(37,99,235,0.2);
@@ -262,6 +262,22 @@ body::before {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 50%;          /* 原来靠父级 overflow:hidden 裁圆，现在改到 img 本身 */
+}
+
+/* 头像在线绿点 */
+.avatar-dot {
+  position: absolute;
+  /* 用百分比定位：sin(45°) ≈ 0.707，绿点圆心落在头像圆的右下 45° 处
+     50% + 50%*0.707 = 85.35%，再减去绿点半径(约 6px)做微调 */
+  bottom: 10%;
+  right: 5%;
+  width: 14%;          /* 随头像尺寸等比缩放，120px时≈16.8px，80px时≈11.2px */
+  height: 14%;
+  border-radius: 50%;
+  background: #34d399;
+  border: 2px solid #e8e8e9;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
 }
 
 .name {
@@ -449,8 +465,6 @@ body::before {
 .gov-icon {
   width: auto;
   height: 14px;
-  vertical-align: middle;
-}
   vertical-align: middle;
   margin-right: 4px;
 }

@@ -28,6 +28,11 @@ let currentQuoteIndex = 0;
  * 初始化粒子背景
  */
 function initParticles() {
+  // 尊重用户的动画偏好
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
   const container = document.getElementById('particles');
   if (!container) return;
 

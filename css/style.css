@@ -317,6 +317,7 @@ body::before {
   color: #fff;
   font-family: 'Courier New', monospace;
   letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .time .digit {

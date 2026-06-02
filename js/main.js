@@ -1,184 +1,111 @@
-/**
- * 0x5c0f 个人主页 - 主脚本
- */
+(function () {
+  'use strict';
 
-// 配置
-const CONFIG = {
-  siteName: '0x5c0f',
-  quotes: [
-    '「又一天过去了，梦想是不是更远了？」',
-    '「情绪不好的时候，问问自己，是不是又在强求不属于自己的东西了。」',
-    '「生活的理想，就是为了理想的生活。」',
-    '「人生的价值，并不是用时间，而是用深度去衡量的。」',
-    '「世界上只有一种英雄主义，就是看清生活的真相之后依然热爱生活。」',
-    '「你若要喜爱你自己的价值，你就得给世界创造价值。」',
-    '「人生应该如蜡烛一样，从顶燃到底，一直都是光明的。」',
-    '「一个人的价值，应该看他贡献什么，而不应当看他取得什么。」',
-    '「人只有献身于社会，才能找出那短暂而有风险的生命的意义。」',
-    '「芸芸众生，孰不爱生？爱生之极，进而爱群。」'
-  ],
-  particleCount: 30,
-  quoteInterval: 30000 // 30秒
-};
+  /* ===== 打字机效果 ===== */
+  const bioEl = document.getElementById('bio');
+  if (bioEl) {
+    const fullText = bioEl.dataset.text || '';
 
-// 状态
-let lastTime = '';
-let currentQuoteIndex = 0;
+    // 初始显示 "..."
+    bioEl.textContent = ' ...';
 
-/**
- * 初始化粒子背景
- */
-function initParticles() {
-  // 尊重用户的动画偏好
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return;
-  }
+    setTimeout(function () {
+      bioEl.textContent = '';
+      let idx = 0;
 
-  const container = document.getElementById('particles');
-  if (!container) return;
-
-  for (let i = 0; i < CONFIG.particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-    particle.style.animationDelay = Math.random() * 10 + 's';
-    particle.style.width = (Math.random() * 4 + 2) + 'px';
-    particle.style.height = particle.style.width;
-    container.appendChild(particle);
-  }
-}
-
-/**
- * 初始化加载动画
- */
-function initLoader() {
-  setTimeout(() => {
-    const loader = document.getElementById('loader-wrapper');
-    const card = document.querySelector('.card');
-
-    if (loader) {
-      loader.classList.add('loaded');
-    }
-
-    setTimeout(() => {
-      if (card) {
-        card.classList.add('visible');
+      function typeChar() {
+        if (idx < fullText.length) {
+          idx++;
+          bioEl.textContent = fullText.slice(0, idx) + '...';
+          const delay = 120 + Math.random() * 100;
+          setTimeout(typeChar, delay);
+        }
       }
-    }, 800);
-  }, 2000);
-}
 
-/**
- * 更新时间显示
- */
-function updateTime() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const currentTime = hours + ':' + minutes + ':' + seconds;
-
-  if (currentTime !== lastTime) {
-    const timeEl = document.getElementById('time');
-    if (timeEl) {
-      timeEl.innerHTML = '';
-
-      for (let i = 0; i < currentTime.length; i++) {
-        const span = document.createElement('span');
-        span.className = 'digit';
-        span.textContent = currentTime[i];
-        timeEl.appendChild(span);
-      }
-    }
-
-    lastTime = currentTime;
+      typeChar();
+    }, 900);
   }
 
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-  const weekDay = weekDays[now.getDay()];
-
+  /* ===== 时钟 ===== */
+  const timeEl = document.getElementById('time');
   const dateEl = document.getElementById('date');
-  if (dateEl) {
-    dateEl.textContent = year + '年' + month + '月' + day + '日 星期' + weekDay;
-  }
-}
 
-/**
- * 更新一言（带淡入淡出）
- */
-function updateQuote(quote) {
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+
+    if (timeEl) {
+      timeEl.textContent = h + ':' + m + ':' + s;
+      if (s === '00') {
+        timeEl.classList.add('flicker');
+        setTimeout(function () { timeEl.classList.remove('flicker'); }, 200);
+      }
+    }
+
+    if (dateEl) {
+      const week = ['日', '一', '二', '三', '四', '五', '六'];
+      dateEl.textContent =
+        now.getFullYear() + ' 年 ' +
+        (now.getMonth() + 1) + ' 月 ' +
+        now.getDate() + ' 日　星期' + week[now.getDay()];
+    }
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  /* ===== 一言 ===== */
   const quoteEl = document.getElementById('quote');
-  if (!quoteEl) return;
+  const fallbackQuotes = [
+    '人生就是一次次幸福的奔赴。',
+    '代码如诗，调试如禅。',
+    '每一行注释，都是写给未来自己的信。',
+    '世界是代码的，也是数据的，但归根结底是人的。',
+  ];
 
-  quoteEl.classList.add('fade-out');
-
-  setTimeout(() => {
-    quoteEl.textContent = quote;
-    quoteEl.classList.remove('fade-out');
-  }, 500);
-}
-
-/**
- * 从本地数组获取随机一言
- */
-function getRandomQuote() {
-  const quote = CONFIG.quotes[currentQuoteIndex];
-  currentQuoteIndex = (currentQuoteIndex + 1) % CONFIG.quotes.length;
-  return quote;
-}
-
-
-/**
- * 初始化一言
- */
-function initQuote() {
-  // 显示本地一言
-  updateQuote(getRandomQuote());
-
-  // 定时更新本地一言
-  setInterval(() => {
-    updateQuote(getRandomQuote());
-  }, CONFIG.quoteInterval);
-}
-
-/**
- * 处理备案信息显示
- */
-function handleBeian() {
-  const domain = window.location.hostname;
-  const beianEl = document.getElementById('beian');
-
-  if (beianEl && domain.indexOf('tools.0x5c0f.cc') === -1) {
-    // 备案信息在本地环境也显示
-    // beianEl.style.display = 'none';
+  function fetchQuote() {
+    fetch('https://v1.hitokoto.cn/?encode=text&max_length=48')
+      .then(function (r) { return r.text(); })
+      .then(function (text) {
+        if (quoteEl && text && text.trim()) {
+          quoteEl.classList.add('fade');
+          setTimeout(function () {
+            quoteEl.textContent = '「 ' + text.trim() + ' 」';
+            quoteEl.classList.remove('fade');
+          }, 400);
+        }
+      })
+      .catch(function () {
+        /* 降级：API 失败时才显示备用文案 */
+        if (quoteEl) {
+          const text = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+          quoteEl.classList.add('fade');
+          setTimeout(function () {
+            quoteEl.textContent = '「 ' + text + ' 」';
+            quoteEl.classList.remove('fade');
+          }, 400);
+        }
+      });
   }
-}
 
-/**
- * 初始化
- */
-function init() {
-  initParticles();
-  initLoader();
+  fetchQuote();
 
-  // 更新时间
-  updateTime();
-  setInterval(updateTime, 1000);
+  /* ===== 光尘粒子 ===== */
+  var dustContainer = document.getElementById('dust');
+  if (dustContainer) {
+    var fragment = document.createDocumentFragment();
+    for (var i = 0; i < 15; i++) {
+      var speck = document.createElement('span');
+      speck.className = 'dust-speck';
+      speck.style.left   = Math.random() * 100 + '%';
+      speck.style.top    = Math.random() * 100 + '%';
+      speck.style.animationDelay = Math.random() * 10 + 's';
+      speck.style.animationDuration = (6 + Math.random() * 10) + 's';
+      fragment.appendChild(speck);
+    }
+    dustContainer.appendChild(fragment);
+  }
 
-  // 初始化一言
-  initQuote();
-
-  // 处理备案信息
-  handleBeian();
-}
-
-// 页面加载完成后初始化
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+})();

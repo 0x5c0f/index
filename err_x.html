@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>维护中 · 一个曾经的小码农</title>
+<meta name="theme-color" content="#08080c">
+<style>
+  :root{
+    --bg:#08080c;
+    --bg-panel:#0d0e15;
+    --border:#212333;
+    --fg:#e2e3ec;
+    --fg-dim:#7b7e91;
+    --fg-dimmer:#3c3f54;
+    --ink:#c9a877;
+    --ink-soft:rgba(201,168,119,0.35);
+    --ink-glow:rgba(201,168,119,0.16);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'JetBrains Mono','SFMono-Regular',Consolas,Menlo,monospace;
+    font-size:18px;
+    line-height:1.65;
+    padding:40px 24px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .stage{
+    position:relative;
+    width:100%;
+    max-width:800px;
+  }
+  .glow{
+    position:absolute;
+    left:50%;
+    top:38%;
+    width:120%;
+    aspect-ratio:1.6/1;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(closest-side, var(--ink-glow), transparent 72%);
+    filter:blur(6px);
+    z-index:0;
+    pointer-events:none;
+  }
+  .term{
+    position:relative;
+    z-index:1;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:
+      0 2px 0 rgba(255,255,255,0.03) inset,
+      0 60px 120px -40px rgba(0,0,0,0.85),
+      0 20px 50px -15px var(--ink-soft);
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:14px 18px;
+    border-bottom:1px solid var(--border);
+    background:#0a0b11;
+  }
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--fg-dimmer);}
+  .term-title{
+    margin-left:10px;
+    color:var(--fg-dim);
+    font-size:13px;
+    letter-spacing:.02em;
+  }
+  .term-body{
+    padding:42px 46px 48px;
+  }
+  .line{white-space:pre-wrap;word-break:break-word;font-size:17px;}
+  .prompt{color:var(--ink);}
+  .path{color:#9a9cb0;}
+  .out-ok{color:var(--ink);}
+  .out-dim{color:var(--fg-dim);}
+  .cursor{
+    display:inline-block;
+    width:8px;height:16px;
+    background:var(--ink);
+    vertical-align:-3px;
+    animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  .divider{
+    height:1px;
+    background:var(--border);
+    margin:26px 0 28px;
+  }
+
+  .hero{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    margin:0 0 18px;
+  }
+  .glyph{
+    font-size:clamp(72px, 12vw, 116px);
+    font-weight:700;
+    color:var(--ink);
+    line-height:1;
+  }
+  .pulse-dot{
+    width:10px;height:10px;
+    border-radius:50%;
+    background:var(--ink);
+    box-shadow:0 0 0 0 rgba(201,168,119,.6);
+    animation:pulse 1.8s ease-out infinite;
+    flex:none;
+    align-self:center;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(201,168,119,.5);}
+    70%{box-shadow:0 0 0 12px rgba(201,168,119,0);}
+    100%{box-shadow:0 0 0 0 rgba(201,168,119,0);}
+  }
+
+  .headline{
+    color:var(--fg);
+    font-size:23px;
+    margin:0 0 11px;
+    font-weight:500;
+  }
+  .sub{
+    color:var(--fg-dim);
+    font-size:16.5px;
+    margin:0;
+    line-height:1.7;
+  }
+
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px 28px;
+    margin-top:34px;
+  }
+  .actions a, .actions button{
+    color:var(--fg);
+    text-decoration:none;
+    font-family:inherit;
+    font-size:16px;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+  }
+  .actions .cmd{color:var(--ink);}
+  .actions .arrow{color:var(--fg-dimmer);}
+  .actions a:hover .cmd, .actions button:hover .cmd{
+    text-decoration:underline;
+  }
+
+  .footline{
+    margin-top:28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:var(--fg-dimmer);
+    font-size:12.5px;
+  }
+  #clock{color:var(--fg-dim);}
+  .blur{
+    filter:blur(2.5px);
+    opacity:.55;
+    letter-spacing:.01em;
+    user-select:none;
+  }
+
+  @media (max-width:560px){
+    .term-body{padding:28px 24px 32px;}
+    .glyph{font-size:clamp(52px,18vw,72px);}
+    .headline{font-size:19px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .cursor{animation:none;opacity:1;}
+    .pulse-dot{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="glow" aria-hidden="true"></div>
+
+  <div class="term">
+    <div class="term-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="term-title">bash — <span class="blur" id="hostTitle">blog.0x5c0f</span></span>
+    </div>
+    <div class="term-body">
+      <div class="line"><span class="prompt">$</span> systemctl status <span class="path blur" id="hostSvc">blog.0x5c0f</span></div>
+      <div class="line out-ok">● <span class="blur" id="hostSvcName">blog</span>.service — 维护模式</div>
+      <div class="line out-dim">Active: <span class="out-ok">maintenance</span> (running)<span class="cursor"></span></div>
+
+      <div class="divider"></div>
+
+      <div class="hero">
+        <span class="glyph">歇</span>
+        <span class="pulse-dot"></span>
+      </div>
+      <p class="headline">正在维护，稍后回来。</p>
+      <p class="sub">该修的都在修，麻烦你等一下。</p>
+
+      <div class="actions">
+        <button onclick="location.reload()"><span class="cmd">$ retry</span><span class="arrow">→ 刷新看看</span></button>
+        <a href="https://blog.0x5c0f.cc"><span class="cmd">$ openblog</span><span class="arrow">→ blog.0x5c0f.cc</span></a>
+      </div>
+
+      <div class="footline">
+        <span>by 0x5c0f</span>
+        <span>已经歇了 <span id="elapsed">00:00</span> · <span id="clock">00:00:00</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function tick(){
+    var d = new Date();
+    var f = function(n){ return String(n).padStart(2,'0'); };
+    document.getElementById('clock').textContent = f(d.getHours())+':'+f(d.getMinutes())+':'+f(d.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  try {
+    var host = window.location.hostname || 'blog.0x5c0f';
+    var parts = host.split('.');
+    var shortHost = parts.length > 2 ? parts.slice(0, -1).join('.') : host;
+    document.getElementById('hostTitle').textContent = host;
+    document.getElementById('hostSvc').textContent = host;
+    document.getElementById('hostSvcName').textContent = shortHost;
+  } catch(e){}
+
+  var start = Date.now();
+  function elapsedTick(){
+    var s = Math.floor((Date.now()-start)/1000);
+    var m = Math.floor(s/60);
+    var f = function(n){ return String(n).padStart(2,'0'); };
+    document.getElementById('elapsed').textContent = f(m) + ':' + f(s%60);
+  }
+  elapsedTick();
+  setInterval(elapsedTick, 1000);
+
+  setInterval(function(){
+    fetch('/', {method:'HEAD', cache:'no-store'}).then(function(r){
+      if(r.ok) location.reload();
+    }).catch(function(){});
+  }, 30000);
+</script>
+</body>
+</html>

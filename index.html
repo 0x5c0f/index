@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,9 @@
   <meta property="og:image" content="img/logo_avatar.png">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#08080c">
+  <script>
+    (function(){try{var t=localStorage.getItem("0x5c0f-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
@@ -17,6 +20,11 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
+
+  <button class="theme-toggle mono" type="button" aria-label="切换主题" title="切换主题">
+    <span class="icon-sun" aria-hidden="true">&#9728;</span>
+    <span class="icon-moon" aria-hidden="true">&#9790;</span>
+  </button>
 
   <div class="scanlines" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
@@ -66,12 +74,6 @@
         <span class="cmd-middle"><span class="cmd-action">open</span><span class="cmd-target">github</span></span>
         <span class="cmd-arrow">→</span>
         <span class="cmd-result">github.com/0x5c0f</span>
-      </a>
-      <a href="/azenv/" class="cmd-link">
-        <span class="cmd-prompt">$</span>
-        <span class="cmd-middle"><span class="cmd-action">open</span><span class="cmd-target">azenv</span></span>
-        <span class="cmd-arrow">→</span>
-        <span class="cmd-result">0x5c0f.cc/azenv</span>
       </a>
     </nav>
 

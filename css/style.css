@@ -17,6 +17,56 @@
   --serif: "Noto Serif SC", "Source Han Serif SC", "SimSun", Georgia, serif;
 }
 
+/* ===== 亮色主题：纸金（暗金的对偶，与 azenv 一致） ===== */
+[data-theme="light"] {
+  --void:        #f7f2e8;
+  --void-warm:   #efe9db;
+  --phosphor:    #a67c26;
+  --phosphor-dim: rgba(166, 124, 38, 0.14);
+  --phosphor-glow: rgba(166, 124, 38, 0.30);
+  --text-primary:   #2b2418;
+  --text-secondary: #57503f;
+  --text-tertiary:  #7d7461;
+}
+[data-theme="light"] .scanlines,
+[data-theme="light"] .vignette,
+[data-theme="light"] .phosphor-dust { display: none; }
+[data-theme="light"] .avatar { filter: brightness(1) contrast(1) saturate(0.9); }
+/* 纸金下：去掉发光脉冲光圈，改为柔和的暖色投影，融入纸面 */
+[data-theme="light"] .avatar-glow {
+  animation: none;
+  inset: -4px;
+  box-shadow:
+    0 6px 22px rgba(166, 124, 38, 0.16),
+    0 2px 8px rgba(43, 36, 24, 0.08);
+}
+
+/* ===== 主题切换按钮（右上角固定） ===== */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1001;
+  background: none;
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  border-radius: var(--radius);
+  font-size: 15px;
+  line-height: 1;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.theme-toggle:hover { background: var(--phosphor-dim); color: var(--text-primary); }
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
+[data-theme="light"] .theme-toggle .icon-moon { display: inline; }
+
 /* ===== 重置 ===== */
 *, *::before, *::after {
   margin: 0;

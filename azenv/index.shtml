@@ -1,15 +1,23 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>azenv · 请求环境回显</title>
-  <meta name="description" content="回显你的连接所携带的请求头和服务器变量 —— 纯 nginx SSI 实现，无任何后端代码。">
+  <meta name="description" content="回显你的连接所携带的请求头和服务器变量。">
   <meta name="theme-color" content="#08080c">
+  <script>
+    (function(){try{var t=localStorage.getItem("0x5c0f-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+  </script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body>
+
+  <button class="theme-toggle mono" type="button" aria-label="切换主题" title="切换主题">
+    <span class="icon-sun" aria-hidden="true">&#9728;</span>
+    <span class="icon-moon" aria-hidden="true">&#9790;</span>
+  </button>
 
   <div class="scanlines" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
@@ -28,7 +36,7 @@
     <header class="term-head">
       <span class="term-caret">❯</span>
       <h1 class="term-title">azenv</h1>
-      <span class="term-sub">request environment echo · pure nginx SSI</span>
+      <span class="term-sub">request environment echo</span>
     </header>
 
     <!-- 主 IP -->
@@ -72,137 +80,65 @@
         <button class="copy mono" type="button" aria-label="Copy">copy</button>
       </div>
 
-      <!--# if expr="$http_accept" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_ACCEPT</span><span class="val mono"><!--# echo var="http_accept" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_ACCEPT</span><span class="val mono"><!--# if expr="$http_accept" --><!--# echo var="http_accept" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_accept_encoding" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_ACCEPT_ENCODING</span><span class="val mono"><!--# echo var="http_accept_encoding" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_ACCEPT_ENCODING</span><span class="val mono"><!--# if expr="$http_accept_encoding" --><!--# echo var="http_accept_encoding" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_accept_language" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_ACCEPT_LANGUAGE</span><span class="val mono"><!--# echo var="http_accept_language" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_ACCEPT_LANGUAGE</span><span class="val mono"><!--# if expr="$http_accept_language" --><!--# echo var="http_accept_language" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_authorization" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_AUTHORIZATION</span><span class="val mono dim">[redacted]</span><button class="copy mono" type="button" aria-label="Copy" disabled>copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_AUTHORIZATION</span><span class="val mono dim"><!--# if expr="$http_authorization" -->[redacted]<!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy" disabled>copy</button></div>
 
-      <!--# if expr="$http_cache_control" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CACHE_CONTROL</span><span class="val mono"><!--# echo var="http_cache_control" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CACHE_CONTROL</span><span class="val mono"><!--# if expr="$http_cache_control" --><!--# echo var="http_cache_control" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cdn_loop" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CDN_LOOP</span><span class="val mono"><!--# echo var="http_cdn_loop" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CDN_LOOP</span><span class="val mono"><!--# if expr="$http_cdn_loop" --><!--# echo var="http_cdn_loop" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_connecting_ip" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_CONNECTING_IP</span><span class="val mono"><!--# echo var="http_cf_connecting_ip" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_CONNECTING_IP</span><span class="val mono"><!--# if expr="$http_cf_connecting_ip" --><!--# echo var="http_cf_connecting_ip" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_ew_via" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_EW_VIA</span><span class="val mono"><!--# echo var="http_cf_ew_via" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_EW_VIA</span><span class="val mono"><!--# if expr="$http_cf_ew_via" --><!--# echo var="http_cf_ew_via" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_ipcity" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPCITY</span><span class="val mono"><!--# echo var="http_cf_ipcity" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPCITY</span><span class="val mono"><!--# if expr="$http_cf_ipcity" --><!--# echo var="http_cf_ipcity" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_ipcontinent" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPCONTINENT</span><span class="val mono"><!--# echo var="http_cf_ipcontinent" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPCONTINENT</span><span class="val mono"><!--# if expr="$http_cf_ipcontinent" --><!--# echo var="http_cf_ipcontinent" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_ipcountry" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPCOUNTRY</span><span class="val mono"><!--# echo var="http_cf_ipcountry" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPCOUNTRY</span><span class="val mono"><!--# if expr="$http_cf_ipcountry" --><!--# echo var="http_cf_ipcountry" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_iplatitude" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPLATITUDE</span><span class="val mono"><!--# echo var="http_cf_iplatitude" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPLATITUDE</span><span class="val mono"><!--# if expr="$http_cf_iplatitude" --><!--# echo var="http_cf_iplatitude" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_iplongitude" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPLONGITUDE</span><span class="val mono"><!--# echo var="http_cf_iplongitude" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_IPLONGITUDE</span><span class="val mono"><!--# if expr="$http_cf_iplongitude" --><!--# echo var="http_cf_iplongitude" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_postal_code" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_POSTAL_CODE</span><span class="val mono"><!--# echo var="http_cf_postal_code" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_POSTAL_CODE</span><span class="val mono"><!--# if expr="$http_cf_postal_code" --><!--# echo var="http_cf_postal_code" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_ray" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_RAY</span><span class="val mono"><!--# echo var="http_cf_ray" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_RAY</span><span class="val mono"><!--# if expr="$http_cf_ray" --><!--# echo var="http_cf_ray" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_region" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_REGION</span><span class="val mono"><!--# echo var="http_cf_region" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_REGION</span><span class="val mono"><!--# if expr="$http_cf_region" --><!--# echo var="http_cf_region" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_region_code" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_REGION_CODE</span><span class="val mono"><!--# echo var="http_cf_region_code" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_REGION_CODE</span><span class="val mono"><!--# if expr="$http_cf_region_code" --><!--# echo var="http_cf_region_code" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_timezone" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_TIMEZONE</span><span class="val mono"><!--# echo var="http_cf_timezone" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_TIMEZONE</span><span class="val mono"><!--# if expr="$http_cf_timezone" --><!--# echo var="http_cf_timezone" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cf_visitor" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_VISITOR</span><span class="val mono"><!--# echo var="http_cf_visitor" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_CF_VISITOR</span><span class="val mono"><!--# if expr="$http_cf_visitor" --><!--# echo var="http_cf_visitor" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_cookie" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_COOKIE</span><span class="val mono dim">[redacted]</span><button class="copy mono" type="button" aria-label="Copy" disabled>copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_COOKIE</span><span class="val mono dim"><!--# if expr="$http_cookie" -->[redacted]<!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy" disabled>copy</button></div>
 
-      <!--# if expr="$http_proxy_authorization" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_PROXY_AUTHORIZATION</span><span class="val mono dim">[redacted]</span><button class="copy mono" type="button" aria-label="Copy" disabled>copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_PROXY_AUTHORIZATION</span><span class="val mono dim"><!--# if expr="$http_proxy_authorization" -->[redacted]<!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy" disabled>copy</button></div>
 
-      <!--# if expr="$http_sec_fetch_dest" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_DEST</span><span class="val mono"><!--# echo var="http_sec_fetch_dest" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_DEST</span><span class="val mono"><!--# if expr="$http_sec_fetch_dest" --><!--# echo var="http_sec_fetch_dest" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_sec_fetch_mode" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_MODE</span><span class="val mono"><!--# echo var="http_sec_fetch_mode" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_MODE</span><span class="val mono"><!--# if expr="$http_sec_fetch_mode" --><!--# echo var="http_sec_fetch_mode" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_sec_fetch_site" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_SITE</span><span class="val mono"><!--# echo var="http_sec_fetch_site" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_SITE</span><span class="val mono"><!--# if expr="$http_sec_fetch_site" --><!--# echo var="http_sec_fetch_site" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_sec_fetch_user" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_USER</span><span class="val mono"><!--# echo var="http_sec_fetch_user" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_SEC_FETCH_USER</span><span class="val mono"><!--# if expr="$http_sec_fetch_user" --><!--# echo var="http_sec_fetch_user" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_upgrade_insecure_requests" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_UPGRADE_INSECURE_REQUESTS</span><span class="val mono"><!--# echo var="http_upgrade_insecure_requests" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_UPGRADE_INSECURE_REQUESTS</span><span class="val mono"><!--# if expr="$http_upgrade_insecure_requests" --><!--# echo var="http_upgrade_insecure_requests" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_user_agent" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_USER_AGENT</span><span class="val mono"><!--# echo var="http_user_agent" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_USER_AGENT</span><span class="val mono"><!--# if expr="$http_user_agent" --><!--# echo var="http_user_agent" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_x_forwarded_for" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_X_FORWARDED_FOR</span><span class="val mono"><!--# echo var="http_x_forwarded_for" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_X_FORWARDED_FOR</span><span class="val mono"><!--# if expr="$http_x_forwarded_for" --><!--# echo var="http_x_forwarded_for" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
-      <!--# if expr="$http_x_forwarded_proto" -->
-      <div class="row"><span class="lbl mono azenv-key">HTTP_X_FORWARDED_PROTO</span><span class="val mono"><!--# echo var="http_x_forwarded_proto" encoding="entity" --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
-      <!--# endif -->
+      <div class="row"><span class="lbl mono azenv-key">HTTP_X_FORWARDED_PROTO</span><span class="val mono"><!--# if expr="$http_x_forwarded_proto" --><!--# echo var="http_x_forwarded_proto" encoding="entity" --><!--# else -->-<!--# endif --></span><button class="copy mono" type="button" aria-label="Copy">copy</button></div>
 
     </section>
-
-    <!-- FAQ -->
-    <section class="term-card faq">
-      <div class="card-title mono">// faq</div>
-      <details class="faq-item"><summary class="faq-q mono">这个页面是干什么的？</summary><p class="faq-a">它把你的连接所发送的请求头、以及服务器能看到的环境变量原样回显出来 —— 和 Web 服务器看到的完全一致。代理 / VPN 用户用它来判断自己的连接泄露了什么。</p></details>
-      <details class="faq-item"><summary class="faq-q mono">什么是 REMOTE_ADDR？</summary><p class="faq-a">请求到达的 IP。走代理 / VPN 时它应该是代理的地址，而不是你的。如果这里出现了你的真实 IP，说明有泄露。</p></details>
-      <details class="faq-item"><summary class="faq-q mono">什么是 X-Forwarded-For？</summary><p class="faq-a">代理添加的、用于携带原始访客 IP 的请求头。透明代理会原样保留它，从而暴露你想隐藏的地址；配置得当的匿名代理会移除或替换它。</p></details>
-      <details class="faq-item"><summary class="faq-q mono">怎么判断我的代理是否匿名？</summary><p class="faq-a">把这些值和你的真实 IP 对比：如果 REMOTE_ADDR 是代理的、且没有任何字段携带你的地址，说明代理在保护你；只要你的 IP 出现在任一字段里，就没有。</p></details>
-      <details class="faq-item"><summary class="faq-q mono">为什么有些值是 [redacted]？</summary><p class="faq-a">可能携带凭据的请求头（如 Cookie、Authorization）永不回显 —— 即使对你也不回显，避免截图或中间代理截获。</p></details>
-    </section>
-
-    <footer class="azenv-foot mono">
-      <span class="foot-dim">// 纯 nginx SSI 实现 · 无后端代码</span>
-    </footer>
 
   </div>
 

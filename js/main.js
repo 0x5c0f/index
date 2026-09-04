@@ -1,6 +1,25 @@
 (function () {
   'use strict';
 
+  /* ===== 主题切换（与 azenv 共用 key，整站联动） ===== */
+  const THEME_KEY = '0x5c0f-theme';
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  }
+  document.querySelectorAll('.theme-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      setTheme(cur === 'light' ? 'dark' : 'light');
+    });
+  });
+  // 其他标签页切换主题时实时同步
+  window.addEventListener('storage', function (e) {
+    if (e.key === THEME_KEY && (e.newValue === 'light' || e.newValue === 'dark')) {
+      document.documentElement.setAttribute('data-theme', e.newValue);
+    }
+  });
+
   /* ===== 打字机效果 ===== */
   const bioEl = document.getElementById('bio');
   if (bioEl) {

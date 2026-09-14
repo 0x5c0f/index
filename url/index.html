@@ -26,6 +26,14 @@
     .mode { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12.5px; cursor: pointer; user-select: none; padding: 2px 8px; border: 1px dashed rgba(227,184,94,0.35); border-radius: var(--radius); }
     .mode input { accent-color: var(--phosphor); cursor: pointer; }
     .mode:hover { color: var(--text-primary); }
+    /* ? 角标与说明气泡 */
+    .mode-wrap { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+    .help { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--phosphor); color: var(--phosphor); font-size: 11px; line-height: 1; cursor: help; user-select: none; transition: background 0.2s ease; }
+    .help:hover, .help:focus-visible { background: var(--phosphor-dim); color: var(--text-primary); outline: none; }
+    .help-pop { position: absolute; left: 0; top: calc(100% + 8px); z-index: 20; width: min(300px, 82vw); padding: 10px 12px; border: 1px solid var(--phosphor); border-radius: var(--radius); background: var(--void); color: var(--text-secondary); font-size: 12px; line-height: 1.75; text-align: left; box-shadow: 0 8px 28px rgba(0,0,0,0.45); display: none; }
+    .help-pop.show { display: block; }
+    .help-pop b { color: var(--phosphor); font-weight: 500; }
+    [data-theme="light"] .help-pop { background: #fffdf7; box-shadow: 0 8px 28px rgba(43,36,24,0.14); }
   </style>
 </head>
 <body>
@@ -63,9 +71,13 @@
         <button class="btn" type="button" data-action="dec">解码</button>
         <button class="btn" type="button" data-action="swap" title="交换输入与输出">交换</button>
         <button class="btn" type="button" data-action="clear" title="清空输入与输出">清空</button>
-        <label class="mode mono" title="application/x-www-form-urlencoded：空格 ↔ +">
-          <input type="checkbox" id="formMode"> 表单模式 (+)
-        </label>
+        <span class="mode-wrap">
+          <label class="mode mono">
+            <input type="checkbox" id="formMode"> 表单模式 (+)
+          </label>
+          <span class="help mono" id="helpBtn" role="button" tabindex="0" aria-label="表单模式说明" aria-expanded="false">?</span>
+          <span class="help-pop mono" id="helpPop" role="tooltip">勾选后按 <b>application/x-www-form-urlencoded</b> 规则处理：<br>编码时空格 → <b>+</b>，解码时 <b>+</b> → 空格。<br>HTML 表单提交、部分 query string 使用这种编码。</span>
+        </span>
       </div>
 
       <div class="out-head">
@@ -156,6 +168,31 @@
         document.body.removeChild(ta);
       }
     });
+    /* ? 角标：悬停显示说明；点击可“钉住”；点外部/Esc 关闭 */
+    (function () {
+      var btn = document.getElementById('helpBtn');
+      var pop = document.getElementById('helpPop');
+      if (!btn || !pop) return;
+      var pinned = false;
+      function show(v) {
+        pop.classList.toggle('show', v);
+        btn.setAttribute('aria-expanded', v ? 'true' : 'false');
+      }
+      btn.addEventListener('mouseenter', function () { show(true); });
+      btn.addEventListener('mouseleave', function () { if (!pinned) show(false); });
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        pinned = !pinned;
+        show(pinned);
+      });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pinned = !pinned; show(pinned); }
+        else if (e.key === 'Escape') { pinned = false; show(false); }
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target !== btn && !pop.contains(e.target)) { pinned = false; show(false); }
+      });
+    })();
   })();
   </script>
 </body>

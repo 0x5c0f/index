@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>url · 编解码</title>
+  <meta name="description" content="URL 编码 / 解码工具。">
+  <meta name="theme-color" content="#08080c">
+  <script>
+    (function(){try{var t=localStorage.getItem("0x5c0f-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+  </script>
+  <link rel="stylesheet" href="../azenv/style.css">
+  <link rel="icon" href="../azenv/favicon.svg" type="image/svg+xml">
+  <style>
+    .editor { display: block; width: 100%; min-height: 120px; padding: 12px 14px; border: 1px solid var(--phosphor); border-radius: var(--radius); background: rgba(0,0,0,0.25); color: var(--text-primary); font: 13px/1.7 var(--mono); resize: vertical; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    [data-theme="light"] .editor { background: rgba(255,255,255,0.55); }
+    .editor:focus { border-color: var(--phosphor); box-shadow: 0 0 0 2px var(--phosphor-dim); }
+    .editor::placeholder { color: var(--text-tertiary); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; align-items: center; }
+    .actions .btn { flex: 0 1 auto; }
+    .out-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 2px; }
+    .out-head .lbl { color: var(--text-secondary); font-size: 12.5px; letter-spacing: 0.1em; }
+    .info { color: var(--text-tertiary); font-size: 11px; padding-top: 6px; min-height: 1.4em; }
+    .info.err { color: #e06c6c; }
+    /* 表单模式开关 */
+    .mode { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12.5px; cursor: pointer; user-select: none; padding: 2px 8px; border: 1px dashed rgba(227,184,94,0.35); border-radius: var(--radius); }
+    .mode input { accent-color: var(--phosphor); cursor: pointer; }
+    .mode:hover { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle mono" type="button" aria-label="切换主题" title="切换主题">
+    <span class="icon-sun" aria-hidden="true">&#9728;</span>
+    <span class="icon-moon" aria-hidden="true">&#9790;</span>
+  </button>
+
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="shell">
+
+    <a href="/" class="cmd-link back-link">
+      <span class="cmd-prompt">$</span>
+      <span class="cmd-middle"><span class="cmd-action">cd</span><span class="cmd-target">home</span></span>
+      <span class="cmd-arrow">→</span>
+      <span class="cmd-result">0x5c0f.cc</span>
+    </a>
+
+    <header class="term-head">
+      <span class="term-caret">❯</span>
+      <h1 class="term-title">url</h1>
+      <span class="term-sub">url encoder / decoder</span>
+    </header>
+
+    <section class="term-card">
+      <div class="card-title mono">// input</div>
+      <textarea class="editor mono" id="input" placeholder="在此输入文本或 URL-encoded 字符串..." spellcheck="false"></textarea>
+
+      <div class="actions">
+        <button class="btn" type="button" data-action="encc">编码 (Component)</button>
+        <button class="btn" type="button" data-action="encu">编码 (完整URL)</button>
+        <button class="btn" type="button" data-action="dec">解码</button>
+        <button class="btn" type="button" data-action="swap" title="交换输入输出">↕ 交换</button>
+        <button class="btn" type="button" data-action="clear" title="清空">✕ 清空</button>
+        <label class="mode mono" title="application/x-www-form-urlencoded：空格 ↔ +">
+          <input type="checkbox" id="formMode"> 表单模式 (+)
+        </label>
+      </div>
+
+      <div class="out-head">
+        <span class="lbl mono">// output</span>
+        <button class="btn" type="button" id="copyOut" style="flex:0">copy</button>
+      </div>
+      <textarea class="editor mono" id="output" placeholder="结果将在此显示..." readonly spellcheck="false"></textarea>
+      <div class="info" id="info"></div>
+    </section>
+
+  </div>
+
+  <script src="../azenv/app.js" defer></script>
+  <script>
+  (function () {
+    'use strict';
+    var $in = document.getElementById('input');
+    var $out = document.getElementById('output');
+    var $info = document.getElementById('info');
+    var $form = document.getElementById('formMode');
+
+    /* 元素按钮的样式：复用 azenv 的 .copy 外观（金色描边），但用独立 class 避免与 app.js 冲突 */
+    var css = document.createElement('style');
+    css.textContent =
+      '.btn{background:none;border:1px solid var(--phosphor);color:var(--phosphor);border-radius:var(--radius);' +
+      'font:12.5px var(--mono);padding:5px 14px;cursor:pointer;white-space:nowrap;' +
+      'transition:background .2s ease,color .2s ease,border-color .2s ease}' +
+      '.btn:hover{background:var(--phosphor-dim);color:var(--text-primary)}' +
+      '.btn.copied{background:var(--phosphor);color:var(--void)}';
+    document.head.appendChild(css);
+
+    /* 表单模式：空格 <-> + （application/x-www-form-urlencoded）
+       编码：encodeURIComponent 后把 %20 换成 +
+       解码：先把 + 还原成空格再 decodeURIComponent */
+    function toForm(s) { return s.replace(/%20/g, '+'); }
+    function fromForm(s) { return s.replace(/\+/g, ' '); }
+
+    function run(action) {
+      var v = $in.value;
+      if (action === 'swap') { var t = $in.value; $in.value = $out.value; $out.value = t; show(''); return; }
+      if (action === 'clear') { $in.value = ''; $out.value = ''; show(''); return; }
+      if (!v) { show(''); return; }
+
+      try {
+        var r = '';
+        if (action === 'encc') {
+          r = encodeURIComponent(v);
+          if ($form.checked) r = toForm(r);
+          show('encodeURIComponent · 输入 ' + v.length + ' → 输出 ' + r.length + ' 字符');
+        } else if (action === 'encu') {
+          r = encodeURI(v);
+          show('encodeURI · 保留 : / ? # [ ] @ 等保留字符');
+        } else if (action === 'dec') {
+          r = $form.checked ? decodeURIComponent(fromForm(v)) : decodeURIComponent(v);
+          show('decodeURIComponent · 输入 ' + v.length + ' → 输出 ' + r.length + ' 字符');
+        }
+        $out.value = r;
+      } catch (e) {
+        $out.value = '';
+        show('错误: ' + e.message, true);
+      }
+    }
+
+    function show(msg, isErr) {
+      $info.textContent = msg;
+      $info.classList.toggle('err', !!isErr);
+    }
+
+    document.querySelectorAll('[data-action]').forEach(function (btn) {
+      btn.addEventListener('click', function () { run(btn.getAttribute('data-action')); });
+    });
+
+    /* 复制输出 */
+    document.getElementById('copyOut').addEventListener('click', function () {
+      var self = this, text = $out.value;
+      if (!text) return;
+      var done = function () {
+        self.textContent = 'copied ✓'; self.classList.add('copied');
+        setTimeout(function () { self.textContent = 'copy'; self.classList.remove('copied'); }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>json · 格式化 / 转换</title>
+  <meta name="description" content="JSON 格式化、压缩，转 YAML / TOML。">
+  <meta name="theme-color" content="#08080c">
+  <script>
+    (function(){try{var t=localStorage.getItem("0x5c0f-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+  </script>
+  <link rel="stylesheet" href="../azenv/style.css">
+  <link rel="icon" href="../azenv/favicon.svg" type="image/svg+xml">
+  <style>
+    .editor { display: block; width: 100%; min-height: 130px; padding: 12px 14px; border: 1px solid var(--phosphor); border-radius: var(--radius); background: rgba(0,0,0,0.25); color: var(--text-primary); font: 13px/1.7 var(--mono); resize: vertical; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    [data-theme="light"] .editor { background: rgba(255,255,255,0.55); }
+    .editor:focus { border-color: var(--phosphor); box-shadow: 0 0 0 2px var(--phosphor-dim); }
+    .editor::placeholder { color: var(--text-tertiary); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; align-items: center; }
+    .btn { background: none; border: 1px solid var(--phosphor); color: var(--phosphor); border-radius: var(--radius); font: 12.5px/1.4 var(--mono); padding: 5px 14px; cursor: pointer; white-space: nowrap; transition: background .2s ease, color .2s ease, border-color .2s ease; }
+    .btn:hover { background: var(--phosphor-dim); color: var(--text-primary); }
+    .btn.copied { background: var(--phosphor); color: var(--void); }
+    .ctrl { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12.5px; }
+    .ctrl select { background: transparent; border: 1px dashed rgba(227,184,94,0.35); color: var(--text-primary); border-radius: var(--radius); font: 12.5px var(--mono); padding: 4px 8px; cursor: pointer; outline: none; }
+    .ctrl select:hover { border-style: solid; }
+    .ctrl select option { background: var(--void); color: var(--text-primary); }
+    .out-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 2px; }
+    .out-head .lbl { color: var(--text-secondary); font-size: 12.5px; letter-spacing: 0.1em; }
+    .info { color: var(--text-tertiary); font-size: 11px; padding-top: 6px; min-height: 1.4em; }
+    .info.err { color: #e06c6c; }
+    .info.warn { color: var(--phosphor); }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle mono" type="button" aria-label="切换主题" title="切换主题">
+    <span class="icon-sun" aria-hidden="true">&#9728;</span>
+    <span class="icon-moon" aria-hidden="true">&#9790;</span>
+  </button>
+
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="shell">
+
+    <a href="/" class="cmd-link back-link">
+      <span class="cmd-prompt">$</span>
+      <span class="cmd-middle"><span class="cmd-action">cd</span><span class="cmd-target">home</span></span>
+      <span class="cmd-arrow">→</span>
+      <span class="cmd-result">0x5c0f.cc</span>
+    </a>
+
+    <header class="term-head">
+      <span class="term-caret">❯</span>
+      <h1 class="term-title">json</h1>
+      <span class="term-sub">format · minify · yaml · toml</span>
+    </header>
+
+    <section class="term-card">
+      <div class="card-title mono">// input</div>
+      <textarea class="editor mono" id="input" placeholder='在此粘贴 JSON，如 {"name":"azenv","tags":["a","b"]}...' spellcheck="false"></textarea>
+
+      <div class="actions">
+        <button class="btn" type="button" data-action="fmt">格式化</button>
+        <button class="btn" type="button" data-action="min">压缩</button>
+        <button class="btn" type="button" data-action="yaml">转 YAML</button>
+        <button class="btn" type="button" data-action="toml">转 TOML</button>
+        <button class="btn" type="button" data-action="swap" title="交换输入与输出">交换</button>
+        <button class="btn" type="button" data-action="clear" title="清空输入与输出">清空</button>
+        <label class="ctrl" title="格式化缩进">缩进
+          <select id="indent">
+            <option value="2" selected>2 空格</option>
+            <option value="4">4 空格</option>
+            <option value="tab">Tab</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="out-head">
+        <span class="lbl mono">// output</span>
+        <button class="btn" type="button" id="copyOut">copy</button>
+      </div>
+      <textarea class="editor mono" id="output" placeholder="结果将在此显示..." readonly spellcheck="false"></textarea>
+      <div class="info" id="info"></div>
+    </section>
+
+  </div>
+
+  <script src="../azenv/app.js" defer></script>
+  <script>
+  (function () {
+    'use strict';
+    var $in = document.getElementById('input');
+    var $out = document.getElementById('output');
+    var $info = document.getElementById('info');
+    var $indent = document.getElementById('indent');
+
+    function show(msg, cls) {
+      $info.textContent = msg;
+      $info.className = 'info' + (cls ? ' ' + cls : '');
+    }
+    function parse() {
+      var text = $in.value.replace(/^\uFEFF/, '').trim();
+      if (!text) throw new Error('输入为空，请粘贴 JSON');
+      return JSON.parse(text);
+    }
+
+    /* ================= YAML ================= */
+    function yamlStr(s) {
+      if (s === '') return '""';
+      var reserved = /^(true|false|null|yes|no|on|off|y|n|~)$/i;
+      var isNum = /^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/.test(s) || /^0x[0-9a-f]+$/i.test(s);
+      var plainOk = /^[A-Za-z0-9_][A-Za-z0-9 _\/.\-]*$/.test(s) && !reserved.test(s) && !isNum;
+      if (plainOk && s === s.trim() && !/[\t\r\n]/.test(s)) return s;
+      return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"';
+    }
+    function yamlScalar(v) {
+      if (v === null || v === undefined) return 'null';
+      if (typeof v === 'boolean') return v ? 'true' : 'false';
+      if (typeof v === 'number') return isFinite(v) ? String(v) : 'null';
+      if (typeof v === 'string') return yamlStr(v);
+      throw new Error('YAML 无法序列化的类型');
+    }
+    function jsonToYaml(v, ind) {
+      var pad = '  '.repeat(ind);
+      if (v === null || typeof v !== 'object') return yamlScalar(v);
+      if (Array.isArray(v)) {
+        if (v.length === 0) return '[]';
+        var out = [];
+        for (var i = 0; i < v.length; i++) {
+          var item = v[i];
+          if (item !== null && typeof item === 'object') {
+            var s = jsonToYaml(item, ind + 1);
+            if (s.indexOf('\n') === -1) { out.push(pad + '- ' + s.trimStart()); }
+            else if (Array.isArray(item)) { out.push(pad + '-'); out.push(s); }
+            else {
+              var lines = s.split('\n');
+              out.push(pad + '- ' + lines[0].trimStart());
+              for (var j = 1; j < lines.length; j++) out.push(lines[j]);
+            }
+          } else {
+            out.push(pad + '- ' + jsonToYaml(item, ind + 1));
+          }
+        }
+        return out.join('\n');
+      }
+      var keys = Object.keys(v);
+      if (keys.length === 0) return '{}';
+      var lines2 = [];
+      for (var k = 0; k < keys.length; k++) {
+        var key = keys[k], val = v[key], qk = yamlStr(key);
+        if (val !== null && typeof val === 'object') {
+          var empty = Array.isArray(val) ? val.length === 0 : Object.keys(val).length === 0;
+          if (empty) lines2.push(pad + qk + ': ' + (Array.isArray(val) ? '[]' : '{}'));
+          else { lines2.push(pad + qk + ':'); lines2.push(jsonToYaml(val, ind + 1)); }
+        } else {
+          lines2.push(pad + qk + ': ' + jsonToYaml(val, ind + 1));
+        }
+      }
+      return lines2.join('\n');
+    }
+
+    /* ================= TOML ================= */
+    var nullDropped = 0;
+    function tomlStr(s) {
+      return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"';
+    }
+    function tomlKey(k) { return /^[A-Za-z0-9_-]+$/.test(k) ? k : tomlStr(k); }
+    function tomlScalar(v) {
+      if (v === null || v === undefined) { nullDropped++; return null; }
+      if (typeof v === 'boolean') return v ? 'true' : 'false';
+      if (typeof v === 'number') return String(v);
+      if (typeof v === 'string') return tomlStr(v);
+      throw new Error('TOML 不支持的类型');
+    }
+    function tomlArrayLiteral(arr) {
+      var parts = [];
+      for (var i = 0; i < arr.length; i++) {
+        var v = arr[i];
+        if (v === null || v === undefined) { nullDropped++; continue; }
+        if (Array.isArray(v)) parts.push(tomlArrayLiteral(v));
+        else if (v && typeof v === 'object') throw new Error('JSON 数组中嵌套了对象，TOML 无法表示（请检查该数组）');
+        else { var s = tomlScalar(v); if (s !== null) parts.push(s); }
+      }
+      return '[' + parts.join(', ') + ']';
+    }
+    function tomlBody(obj, path) {
+      var kv = [], subs = [], arrs = [];
+      Object.keys(obj).forEach(function (k) {
+        var v = obj[k], key = tomlKey(k);
+        var cp = path ? path + '.' + key : key;
+        if (v === null || v === undefined) { nullDropped++; return; }
+        if (Array.isArray(v)) {
+          var isObj = function (x) { return x && typeof x === 'object' && !Array.isArray(x); };
+          var hasObj = v.some(isObj), hasOther = v.some(function (x) { return !isObj(x); });
+          if (hasObj && hasOther) throw new Error('数组 " + k + " 同时包含对象与标量，TOML 无法表示');
+          if (hasObj) v.forEach(function (item) { if (isObj(item)) arrs.push({ path: cp, obj: item }); });
+          else kv.push(key + ' = ' + tomlArrayLiteral(v));
+        } else if (typeof v === 'object') {
+          if (Object.keys(v).length === 0) kv.push(key + ' = {}');
+          else subs.push({ path: cp, obj: v });
+        } else {
+          kv.push(key + ' = ' + tomlScalar(v));
+        }
+      });
+      var lines = kv.slice();
+      subs.forEach(function (t) {
+        lines.push(''); lines.push('[' + t.path + ']');
+        var body = tomlBody(t.obj, t.path);
+        if (body) lines.push(body);
+      });
+      arrs.forEach(function (t) {
+        lines.push(''); lines.push('[[' + t.path + ']]');
+        var body = tomlBody(t.obj, t.path);
+        if (body) lines.push(body);
+      });
+      return lines.join('\n');
+    }
+
+    /* ================= actions ================= */
+    function run(action) {
+      if (action === 'swap') { var t = $in.value; $in.value = $out.value; $out.value = t; show(''); return; }
+      if (action === 'clear') { $in.value = ''; $out.value = ''; show(''); return; }
+      try {
+        var data = parse(), r = '', note = '';
+        if (action === 'fmt') {
+          var ind = $indent.value === 'tab' ? '\t' : Number($indent.value);
+          r = JSON.stringify(data, null, ind);
+          note = '格式化 · 输出 ' + r.length + ' 字符';
+        } else if (action === 'min') {
+          r = JSON.stringify(data);
+          note = '压缩 · 输出 ' + r.length + ' 字符';
+        } else if (action === 'yaml') {
+          r = jsonToYaml(data, 0) + '\n';
+          note = 'JSON → YAML · 输出 ' + r.length + ' 字符';
+        } else if (action === 'toml') {
+          if (data === null || typeof data !== 'object' || Array.isArray(data))
+            throw new Error('TOML 需要 JSON 对象作为根节点');
+          nullDropped = 0;
+          r = tomlBody(data, '') + '\n';
+          note = 'JSON → TOML · 输出 ' + r.length + ' 字符';
+          if (nullDropped > 0) note += '；已忽略 ' + nullDropped + ' 个 null（TOML 无 null）';
+        }
+        $out.value = r;
+        if (action === 'toml' && nullDropped > 0) show(note, 'warn');
+        else show(note);
+      } catch (e) {
+        $out.value = '';
+        show('错误: ' + (e && e.message ? e.message : String(e)), 'err');
+      }
+    }
+
+    document.querySelectorAll('[data-action]').forEach(function (btn) {
+      btn.addEventListener('click', function () { run(btn.getAttribute('data-action')); });
+    });
+
+    /* copy output */
+    document.getElementById('copyOut').addEventListener('click', function () {
+      var self = this, text = $out.value;
+      if (!text) return;
+      var done = function () {
+        self.textContent = 'copied ✓'; self.classList.add('copied');
+        setTimeout(function () { self.textContent = 'copy'; self.classList.remove('copied'); }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

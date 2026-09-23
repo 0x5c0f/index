@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>json · 格式化 / 转换</title>
-  <meta name="description" content="JSON 格式化、压缩，转 YAML / TOML。">
+  <title>json · 格式化 / 双向互转</title>
+  <meta name="description" content="JSON 格式化、压缩，与 YAML / TOML 双向互转。">
   <meta name="theme-color" content="#08080c">
   <script>
     (function(){try{var t=localStorage.getItem("0x5c0f-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
@@ -20,6 +20,7 @@
     .btn { background: none; border: 1px solid var(--phosphor); color: var(--phosphor); border-radius: var(--radius); font: 12.5px/1.4 var(--mono); padding: 5px 14px; cursor: pointer; white-space: nowrap; transition: background .2s ease, color .2s ease, border-color .2s ease; }
     .btn:hover { background: var(--phosphor-dim); color: var(--text-primary); }
     .btn.copied { background: var(--phosphor); color: var(--void); }
+    .btn.ghost { border-style: dashed; opacity: 0.92; }
     .ctrl { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12.5px; }
     .ctrl select { background: transparent; border: 1px dashed rgba(227,184,94,0.35); color: var(--text-primary); border-radius: var(--radius); font: 12.5px var(--mono); padding: 4px 8px; cursor: pointer; outline: none; }
     .ctrl select:hover { border-style: solid; }
@@ -29,6 +30,14 @@
     .info { color: var(--text-tertiary); font-size: 11px; padding-top: 6px; min-height: 1.4em; }
     .info.err { color: #e06c6c; }
     .info.warn { color: var(--phosphor); }
+    /* ? 说明角标与气泡（与 url 工具一致） */
+    .mode-wrap { position: relative; display: inline-flex; align-items: center; }
+    .help { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--phosphor); color: var(--phosphor); font-size: 11px; line-height: 1; cursor: help; user-select: none; transition: background 0.2s ease; }
+    .help:hover, .help:focus-visible { background: var(--phosphor-dim); color: var(--text-primary); outline: none; }
+    .help-pop { position: absolute; left: 0; top: calc(100% + 8px); z-index: 20; width: min(340px, 84vw); padding: 10px 12px; border: 1px solid var(--phosphor); border-radius: var(--radius); background: var(--void); color: var(--text-secondary); font-size: 12px; line-height: 1.75; text-align: left; box-shadow: 0 8px 28px rgba(0,0,0,0.45); display: none; }
+    .help-pop.show { display: block; }
+    .help-pop b { color: var(--phosphor); font-weight: 500; }
+    [data-theme="light"] .help-pop { background: #fffdf7; box-shadow: 0 8px 28px rgba(43,36,24,0.14); }
   </style>
 </head>
 <body>
@@ -53,21 +62,32 @@
     <header class="term-head">
       <span class="term-caret">❯</span>
       <h1 class="term-title">json</h1>
-      <span class="term-sub">format · minify · yaml · toml</span>
+      <span class="term-sub">format · minify · yaml ⇄ json · toml ⇄ json</span>
     </header>
 
     <section class="term-card">
       <div class="card-title mono">// input</div>
-      <textarea class="editor mono" id="input" placeholder='在此粘贴 JSON，如 {"name":"azenv","tags":["a","b"]}...' spellcheck="false"></textarea>
+      <textarea class="editor mono" id="input" placeholder='在此粘贴 JSON / YAML / TOML（按下方对应按钮解析）...' spellcheck="false"></textarea>
 
       <div class="actions">
         <button class="btn" type="button" data-action="fmt">格式化</button>
         <button class="btn" type="button" data-action="min">压缩</button>
-        <button class="btn" type="button" data-action="yaml">转 YAML</button>
-        <button class="btn" type="button" data-action="toml">转 TOML</button>
+        <button class="btn" type="button" data-action="toYaml">转 YAML</button>
+        <button class="btn" type="button" data-action="toToml">转 TOML</button>
+        <button class="btn ghost" type="button" data-action="y2j" title="YAML 解析为 JSON">YAML → JSON</button>
+        <button class="btn ghost" type="button" data-action="t2j" title="TOML 解析为 JSON">TOML → JSON</button>
+        <span class="mode-wrap">
+          <span class="help mono" id="helpBtn" role="button" tabindex="0" aria-label="反向解析说明" aria-expanded="false">?</span>
+          <span class="help-pop mono" id="helpPop" role="tooltip">
+            <b>全部在浏览器本地完成，数据不出本机。</b><br>
+            YAML 支持：块映射 / 序列（含与父键同缩进）、嵌套、引号与普通标量（<b>含多行折叠</b>）、单行 flow（<b>[ ] { }</b>）、注释、块标量 <b>|</b> 与 <b>&gt;</b>。<br>
+            TOML 支持：<b>[table]</b>、<b>[[array of tables]]</b>、内联表 / 数组、注释、多行字符串。<br>
+            不支持：YAML 锚点 / 别名（<b>&amp; *</b>）、标签（<b>!!</b>）、跨行 flow 集合 —— 遇到会明确报错。
+          </span>
+        </span>
         <button class="btn" type="button" data-action="swap" title="交换输入与输出">交换</button>
         <button class="btn" type="button" data-action="clear" title="清空输入与输出">清空</button>
-        <label class="ctrl" title="格式化缩进">缩进
+        <label class="ctrl" title="格式化 / 反向 JSON 输出的缩进">缩进
           <select id="indent">
             <option value="2" selected>2 空格</option>
             <option value="4">4 空格</option>
@@ -99,13 +119,8 @@
       $info.textContent = msg;
       $info.className = 'info' + (cls ? ' ' + cls : '');
     }
-    function parse() {
-      var text = $in.value.replace(/^\uFEFF/, '').trim();
-      if (!text) throw new Error('输入为空，请粘贴 JSON');
-      return JSON.parse(text);
-    }
 
-    /* ================= YAML ================= */
+    /* ================= YAML 序列化 ================= */
     function yamlStr(s) {
       if (s === '') return '""';
       var reserved = /^(true|false|null|yes|no|on|off|y|n|~)$/i;
@@ -161,7 +176,316 @@
       return lines2.join('\n');
     }
 
-    /* ================= TOML ================= */
+    /* ================= YAML 解析（子集） ================= */
+    function yerr(no, msg) { return new Error('YAML 第' + no + '行: ' + msg); }
+    function yUnescape(s, no) {
+      var out = '', i = 0;
+      while (i < s.length) {
+        var c = s[i];
+        if (c !== '\\') { out += c; i++; continue; }
+        i++;
+        var e = s[i];
+        var map = { n: '\n', t: '\t', r: '\r', '0': '\0', '\\': '\\', '"': '"', "'": "'", '/': '/' };
+        if (e in map) { out += map[e]; i++; }
+        else if (e === 'u') { out += String.fromCharCode(parseInt(s.substr(i + 1, 4) || '0', 16)); i += 5; }
+        else if (e === '\n') { i++; }
+        else if (e === undefined) { throw yerr(no, '字符串末尾存在孤立的反斜杠'); }
+        else { out += e; i++; }
+      }
+      return out;
+    }
+    /* 多行引号标量折叠：单个断行 → 空格；连续 k 断行 → k-1 个换行（YAML folding） */
+    function foldQuoted(s) {
+      if (s.indexOf('\n') < 0) return s;
+      var lines = s.split('\n');
+      var text = lines[0].replace(/\s+$/, '');
+      for (var k = 1; k < lines.length; k++) text += '\n' + lines[k].replace(/^\s+/, '').replace(/\s+$/, '');
+      return text.replace(/\n+/g, function (m) { return m.length === 1 ? ' ' : new Array(m.length).join('\n'); });
+    }
+    /* 从 s[st] 读取一个引号标量（支持跨行），返回 {value, end} */
+    function yReadQuoted(s, st, no) {
+      var q = s[st];
+      if (q === '"') {
+        var raw = '', i = st + 1;
+        while (i < s.length) {
+          var c = s[i];
+          if (c === '\\') {
+            if (s[i + 1] === '\n') { i += 2; continue; }   /* 行尾反斜杠：丢弃断行 */
+            if (i + 1 >= s.length) break;
+            raw += c + s[i + 1]; i += 2; continue;
+          }
+          if (c === q) { i++; return { value: yUnescape(foldQuoted(raw), no), end: i }; }
+          raw += c; i++;
+        }
+        throw yerr(no, '字符串未闭合 (")');
+      }
+      if (q === "'") {
+        var raw2 = '', j = st + 1;
+        while (j < s.length) {
+          if (s[j] === "'" && s[j + 1] === "'") { raw2 += "''"; j += 2; continue; }
+          if (s[j] === "'") { j++; return { value: foldQuoted(raw2).replace(/''/g, "'"), end: j }; }
+          raw2 += s[j]; j++;
+        }
+        throw yerr(no, "字符串未闭合 (')");
+      }
+      throw yerr(no, '不是引号标量');
+    }
+    /* 从 pos 处的引号是否已在字符串内闭合 */
+    function yQuoteClosed(s, pos) {
+      var q = s[pos], i2 = pos + 1;
+      while (i2 < s.length) {
+        var c2 = s[i2];
+        if (q === '"' && c2 === '\\') { i2 += 2; continue; }
+        if (q === "'" && c2 === "'" && s[i2 + 1] === "'") { i2 += 2; continue; }
+        if (c2 === q) return true;
+        i2++;
+      }
+      return false;
+    }
+    /* 找到行内值的起始位置（引号开头 / 冒号后 / 短横后），无值返回 -1 */
+    function yValStart(c) {
+      if (c === '') return -1;
+      if (c[0] === "'" || c[0] === '"') return 0;
+      var ci = yFindColon(c);
+      if (ci >= 0) {
+        var j = ci + 1;
+        while (j < c.length && (c[j] === ' ' || c[j] === '\t')) j++;
+        return j < c.length ? j : -1;
+      }
+      var m = /^-\s+/.exec(c);
+      if (m) return m[0].length < c.length ? m[0].length : -1;
+      return -1;
+    }
+    /* 单行 flow 集合解析 [..] / {..} */
+    function yFlow(s, no) {
+      var i = 0;
+      function ws() { while (i < s.length && (s[i] === ' ' || s[i] === '\t')) i++; }
+      function val() {
+        ws();
+        if (i >= s.length) throw yerr(no, 'flow 集合未闭合（跨行 flow 不受支持）');
+        var c = s[i];
+        if (c === '"' || c === "'") { var r = yReadQuoted(s, i, no); i = r.end; return r.value; }
+        if (c === '[') { i++; var a = []; ws(); if (s[i] === ']') { i++; return a; } for (;;) { a.push(val()); ws(); if (s[i] === ',') { i++; continue; } if (s[i] === ']') { i++; break; } throw yerr(no, 'flow 数组语法错误'); } return a; }
+        if (c === '{') { i++; var o = {}; ws(); if (s[i] === '}') { i++; return o; } for (;;) { ws(); if (s[i] === '"' || s[i] === "'") { var kr = yReadQuoted(s, i, no); i = kr.end; var kk = kr.value; } else { var m = /^[^\s,\]}:]+/.exec(s.slice(i)); if (!m) throw yerr(no, 'flow 映射键缺失'); kk = m[0]; i += m[0].length; } ws(); if (s[i] !== ':') throw yerr(no, 'flow 映射缺少 :'); i++; o[kk] = val(); ws(); if (s[i] === ',') { i++; continue; } if (s[i] === '}') { i++; break; } throw yerr(no, 'flow 映射语法错误'); } return o; }
+        var m2 = /^[^\s,\]}]+/.exec(s.slice(i));
+        if (!m2) throw yerr(no, 'flow 标量缺失');
+        i += m2[0].length;
+        return yPlain(m2[0], no);
+      }
+      var v = val(); ws();
+      if (i < s.length) throw yerr(no, 'flow 集合后有多余内容');
+      return v;
+    }
+    function yPlain(s, no) {
+      if (s === 'null' || s === 'Null' || s === 'NULL' || s === '~') return null;
+      if (/^(true|True|TRUE)$/.test(s)) return true;
+      if (/^(false|False|FALSE)$/.test(s)) return false;
+      if (/^[-+]?\d+$/.test(s)) return parseInt(s, 10);
+      if (/^[-+]?0x[0-9a-fA-F]+$/.test(s)) return parseInt(s.replace(/[-+]?/, '').replace('0x', ''), 16);
+      if (/^[-+]?0o[0-7]+$/.test(s)) return parseInt(s.replace('0o', ''), 8);
+      if (/^[-+]?(\d+\.\d*|\.\d+|\d+)([eE][-+]?\d+)?$/.test(s)) return Number(s);
+      return s;
+    }
+    /* 找到第一个「后跟空格或行尾」且不在引号内的冒号 */
+    function yFindColon(t) {
+      var inQ = null;
+      for (var k = 0; k < t.length; k++) {
+        var c = t[k];
+        if (inQ) { if (c === '\\' && inQ === '"') k++; else if (c === inQ) inQ = null; continue; }
+        if (c === '"' || c === "'") { inQ = c; continue; }
+        if (c === ':' && (k + 1 >= t.length || t[k + 1] === ' ' || t[k + 1] === '\t')) return k;
+      }
+      return -1;
+    }
+    function yIsMapEntry(t) { return yFindColon(t) >= 0; }
+    function yStripComment(s) {
+      var inQ = null;
+      for (var k = 0; k < s.length; k++) {
+        var c = s[k];
+        if (inQ) { if (c === '\\' && inQ === '"') k++; else if (c === inQ) inQ = null; continue; }
+        if (c === '"' || c === "'") { inQ = c; continue; }
+        if (c === '#' && (k === 0 || s[k - 1] === ' ' || s[k - 1] === '\t')) return s.slice(0, k);
+      }
+      return s;
+    }
+    /* 预处理：拆行、去注释、解析块标量，产出 {indent, text, no, scalar?} 列表 */
+    function yPrepare(text) {
+      if (/&\S|\*\S|!\S|<<\s*:/.test(text)) {
+        var mm = /(&\S+|\*\S+|!\S+|<<:\s*\S+)/.exec(text);
+        throw new Error('YAML 不支持锚点 / 别名 / 标签特性: ' + mm[1] + '（可用「转 YAML」重新生成以获得可解析结果）');
+      }
+      var raw = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+      var entries = [], li = 0;
+      while (li < raw.length) {
+        var no = li + 1, line = raw[li];
+        if (/^(---|\.\.\.)\s*$/.test(line)) { li++; continue; }
+        var indent = 0;
+        while (indent < line.length && line[indent] === ' ') indent++;
+        if (line[indent] === '\t') throw yerr(no, '不支持 Tab 缩进');
+        var head = line.slice(indent);
+        /* 多行引号标量：值以引号开头且本行未闭合 → 拼接后续原始行 */
+        var vs = yValStart(head);
+        if (vs >= 0 && (head[vs] === "'" || head[vs] === '"') && !yQuoteClosed(head, vs)) {
+          var joined = head;
+          while (li + 1 < raw.length && !yQuoteClosed(joined, vs)) {
+            li++;
+            joined += '\n' + raw[li];
+          }
+          head = joined;
+        }
+        var content = yStripComment(head).replace(/\s+$/, '');
+        if (content === '') { li++; continue; }
+        /* 块标量检测: "key: |" / "- |" （可带 +- / 数字指示符） */
+        var mSeq = /^-\s+([\|>])([+-]?\d*)$/.exec(content);
+        var mMap = /^(.+?):\s*([\|>])([+-]?\d*)$/.exec(content);
+        var isSeqBlock = false, blockKey = null, blockStyle = '', blockInd = '';
+        if (mSeq) { isSeqBlock = true; blockStyle = mSeq[1]; blockInd = mSeq[2]; }
+        else if (mMap) { blockKey = mMap[1]; blockStyle = mMap[2]; blockInd = mMap[3]; }
+        if (mSeq || mMap) {
+          li++;
+          var blockLines = [];
+          while (li < raw.length) {
+            var l2 = raw[li];
+            var l2ind = 0;
+            while (l2ind < l2.length && l2[l2ind] === ' ') l2ind++;
+            if (l2.replace(/\s+$/, '') === '') { blockLines.push(''); li++; continue; }
+            if (l2ind <= indent) break;
+            blockLines.push(l2); li++;
+          }
+          /* 内容缩进：仅取数字指示符；chomp 符号(+/-)单独解析 */
+          var dig = /(\d+)/.exec(blockInd);
+          var contentIndent = dig ? indent + parseInt(dig[1], 10) : -1;
+          if (contentIndent < 0) {
+            for (var q = 0; q < blockLines.length; q++) {
+              if (blockLines[q].replace(/\s+$/, '') !== '') {
+                var ii = 0; var lb = blockLines[q];
+                while (ii < lb.length && lb[ii] === ' ') ii++;
+                contentIndent = ii; break;
+              }
+            }
+          }
+          if (contentIndent < 0) contentIndent = indent + 2;
+          var stripped = blockLines.map(function (lb2) {
+            var ii2 = 0; while (ii2 < lb2.length && lb2[ii2] === ' ') ii2++;
+            if (ii2 === lb2.length) return '';
+            return lb2.slice(Math.min(contentIndent, ii2));
+          });
+          /* chomping 语义: '-' 去尾换行，'+' 保留全部，缺省补单个换行 */
+          var chomp = blockInd.indexOf('+') >= 0 ? '+' : (blockInd.indexOf('-') >= 0 ? '-' : '');
+          if (chomp !== '+') { while (stripped.length && stripped[stripped.length - 1] === '') stripped.pop(); }
+          var val = '';
+          if (blockStyle === '|') { val = stripped.join('\n'); }
+          else {
+            for (var q2 = 0; q2 < stripped.length; q2++) {
+              var t2 = stripped[q2];
+              if (t2 === '') val += '\n';
+              else val += (val !== '' && !/\n$/.test(val) ? ' ' : '') + t2;
+            }
+          }
+          if (chomp === '-') val = val.replace(/\n+$/, '');
+          else if (chomp !== '+') { if (val !== '') val = val.replace(/\n+$/, '') + '\n'; }
+          if (isSeqBlock) entries.push({ indent: indent, text: '-', no: no, scalar: val });
+          else entries.push({ indent: indent, text: blockKey + ': |', no: no, scalar: val });
+          continue;
+        }
+        entries.push({ indent: indent, text: content, no: no });
+        li++;
+      }
+      return entries;
+    }
+    function yNode(st, minIndent) {
+      var e = st.e[st.p];
+      if (!e || e.indent < minIndent) return null;
+      var ind = e.indent; /* 子块以自身首行缩进为准（可大于父级+1） */
+      if (/^-(\s|$)/.test(e.text)) return ySeq(st, ind);
+      if (yIsMapEntry(e.text)) return yMap(st, ind);
+      st.p++;
+      if (e.scalar !== undefined) return e.scalar;
+      return yScalarValue(e.text, e.no);
+    }
+    function ySeq(st, ind) {
+      var arr = [];
+      for (;;) {
+        var e = st.e[st.p];
+        if (!e || e.indent < ind) break;
+        if (e.indent > ind) throw yerr(e.no, '序列项缩进不一致');
+        if (!/^-(\s|$)/.test(e.text)) break;
+        st.p++;
+        if (e.scalar !== undefined) { arr.push(e.scalar); continue; }
+        var m = /^-(\s*)/.exec(e.text);
+        var rest = e.text.slice(m[0].length);
+        var cIndent = ind + m[0].length;
+        if (rest === '') {
+          arr.push(yNode(st, ind + 1));
+        } else if (yIsMapEntry(rest) || /^-(\s|$)/.test(rest)) {
+          var sub = { e: [{ indent: cIndent, text: rest, no: e.no }], p: 0 };
+          while (st.p < st.e.length && st.e[st.p].indent > ind) sub.e.push(st.e[st.p++]);
+          var v = yNode(sub, cIndent);
+          if (sub.p < sub.e.length) throw yerr(sub.e[sub.p].no, '序列项内缩进异常');
+          arr.push(v);
+        } else {
+          arr.push(yScalarValue(rest, e.no));
+        }
+      }
+      return arr;
+    }
+    function yMap(st, ind) {
+      var obj = {};
+      for (;;) {
+        var e = st.e[st.p];
+        if (!e || e.indent < ind) break;
+        if (e.indent > ind) throw yerr(e.no, '映射缩进不一致');
+        if (/^-(\s|$)/.test(e.text)) break;
+        var ci = yFindColon(e.text);
+        if (ci < 0) throw yerr(e.no, '缺少 ":" 分隔符');
+        var key = e.text.slice(0, ci).trim();
+        var rest = e.text.slice(ci + 1).trim();
+        st.p++;
+        key = yKeyString(key, e.no);
+        if (e.scalar !== undefined) { obj[key] = e.scalar; continue; }
+        if (rest === '') {
+          var nx = st.e[st.p];
+          if (nx && nx.indent > ind) obj[key] = yNode(st, ind + 1);
+          else if (nx && nx.indent === ind && /^-(\s|$)/.test(nx.text)) obj[key] = ySeq(st, ind); /* 序列可与父键同缩进（PyYAML 默认风格） */
+          else obj[key] = null;
+        } else {
+          obj[key] = yScalarValue(rest, e.no);
+        }
+      }
+      return obj;
+    }
+    function yKeyString(key, no) {
+      if (key === '') throw yerr(no, '键名为空');
+      if (key[0] === '"' || key[0] === "'") {
+        var r = yReadQuoted(key, 0, no);
+        if (key.slice(r.end).trim() !== '') throw yerr(no, '键名引号后有多余内容');
+        return r.value;
+      }
+      return key;
+    }
+    function yScalarValue(rest, no) {
+      rest = rest.replace(/\s+$/, '');
+      if (rest === '') return null;
+      var c0 = rest[0];
+      if (c0 === '"' || c0 === "'") {
+        var r = yReadQuoted(rest, 0, no);
+        if (rest.slice(r.end).replace(/\s+$/, '') !== '') throw yerr(no, '引号标量后有多余内容');
+        return r.value;
+      }
+      if (c0 === '[' || c0 === '{') return yFlow(rest, no);
+      if (rest[0] === '|' || rest[0] === '>') return rest; /* 理论上已被预处理捕获 */
+      return yPlain(rest, no);
+    }
+    function parseYaml(text) {
+      var entries = yPrepare(text);
+      if (entries.length === 0) return null;
+      var st = { e: entries, p: 0 };
+      var val = yNode(st, entries[0].indent);
+      if (st.p < entries.length) throw yerr(entries[st.p].no, '缩进异常或存在无法解析的多余内容');
+      return val;
+    }
+
+    /* ================= TOML 序列化 ================= */
     var nullDropped = 0;
     function tomlStr(s) {
       return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
@@ -195,7 +519,7 @@
         if (Array.isArray(v)) {
           var isObj = function (x) { return x && typeof x === 'object' && !Array.isArray(x); };
           var hasObj = v.some(isObj), hasOther = v.some(function (x) { return !isObj(x); });
-          if (hasObj && hasOther) throw new Error('数组 " + k + " 同时包含对象与标量，TOML 无法表示');
+          if (hasObj && hasOther) throw new Error('数组 "' + k + '" 同时包含对象与标量，TOML 无法表示');
           if (hasObj) v.forEach(function (item) { if (isObj(item)) arrs.push({ path: cp, obj: item }); });
           else kv.push(key + ' = ' + tomlArrayLiteral(v));
         } else if (typeof v === 'object') {
@@ -219,33 +543,269 @@
       return lines.join('\n');
     }
 
+    /* ================= TOML 解析（字符级） ================= */
+    function parseToml(text) {
+      var root = {}, cur = root;
+      var i = 0, n = text.length;
+      function lineNo(at) { return text.slice(0, at === undefined ? i : at).split('\n').length; }
+      function err(msg, at) { return new Error('TOML 第' + lineNo(at) + '行: ' + msg); }
+      function ws() { while (i < n && (text[i] === ' ' || text[i] === '\t' || text[i] === '\r')) i++; }
+      function toLineEnd() { while (i < n && text[i] !== '\n') i++; }
+      function expectLineEnd() {
+        ws();
+        if (i < n && text[i] === '#') toLineEnd();
+        if (i < n && text[i] === '\r') i++;
+        if (i < n && text[i] === '\n') i++;
+        else if (i < n) throw err('该行存在无法解析的内容');
+      }
+      function unescapeBasic(s, at) {
+        var out = '', k = 0;
+        while (k < s.length) {
+          var c = s[k];
+          if (c !== '\\') { out += c; k++; continue; }
+          k++;
+          var e = s[k];
+          var map = { n: '\n', t: '\t', r: '\r', '"': '"', '\\': '\\', b: '\b', f: '\f' };
+          if (e in map) { out += map[e]; k++; }
+          else if (e === 'u') { out += String.fromCharCode(parseInt(s.substr(k + 1, 4) || '0', 16)); k += 5; }
+          else if (e === 'U') { out += String.fromCodePoint(parseInt(s.substr(k + 1, 8) || '0', 16)); k += 9; }
+          else throw err('非法转义 \\' + (e || ''), at);
+        }
+        return out;
+      }
+      function readStr() {
+        var q = text[i];
+        if (q === '"' && text[i + 1] === '"' && text[i + 2] === '"') {
+          i += 3;
+          if (text[i] === '\n') i++;
+          var s = i;
+          while (i < n && !(text[i] === '"' && text[i + 1] === '"' && text[i + 2] === '"')) i++;
+          if (i >= n) throw err('""" 多行字符串未闭合');
+          var raw = text.slice(s, i); i += 3;
+          return unescapeBasic(raw.replace(/[ \t]+$/, ''), s);
+        }
+        if (q === "'") {
+          if (text[i + 1] === "'" && text[i + 2] === "'") {
+            i += 3;
+            if (text[i] === '\n') i++;
+            var s2 = i;
+            while (i < n && !(text[i] === "'" && text[i + 1] === "'" && text[i + 2] === "'")) i++;
+            if (i >= n) throw err("''' 多行字符串未闭合");
+            var raw2 = text.slice(s2, i); i += 3;
+            return raw2.replace(/[ \t]+$/, '');
+          }
+          i++;
+          var s3 = i;
+          while (i < n && text[i] !== "'" && text[i] !== '\n') i++;
+          if (text[i] !== "'") throw err("字符串未闭合 (')");
+          var r = text.slice(s3, i); i++;
+          return r;
+        }
+        var at = i;
+        i++;
+        var out = '';
+        while (i < n && text[i] !== '"') {
+          if (text[i] === '\n') throw err('字符串未闭合 (")', at);
+          if (text[i] === '\\') {
+            i++;
+            var e = text[i];
+            var map = { n: '\n', t: '\t', r: '\r', '"': '"', '\\': '\\', b: '\b', f: '\f' };
+            if (e in map) { out += map[e]; i++; }
+            else if (e === 'u') { out += String.fromCharCode(parseInt(text.substr(i + 1, 4) || '0', 16)); i += 5; }
+            else if (e === 'U') { out += String.fromCodePoint(parseInt(text.substr(i + 1, 8) || '0', 16)); i += 9; }
+            else throw err('非法转义 \\' + (e || ''), at);
+            continue;
+          }
+          out += text[i]; i++;
+        }
+        if (i >= n || text[i] !== '"') throw err('字符串未闭合 (")', at);
+        i++;
+        return out;
+      }
+      function readBareToken() {
+        var start = i;
+        while (i < n && !/[\s,\]}#]/.test(text[i])) i++;
+        if (i === start) throw err('缺少值');
+        return text.slice(start, i);
+      }
+      function parseValue() {
+        var c = text[i];
+        if (c === '"' || c === "'") return readStr();
+        if (c === '[') {
+          i++;
+          var arr = [];
+          for (;;) {
+            ws();
+            while (text[i] === '\n') { i++; ws(); }
+            if (i >= n) throw err('数组未闭合 [');
+            if (text[i] === ',') { i++; continue; }
+            if (text[i] === ']') { i++; break; }
+            arr.push(parseValue());
+            ws();
+            if (text[i] === ',') i++;
+            else { ws(); if (text[i] === ']') { i++; break; } if (i >= n || text[i] === '\n') throw err('数组未闭合 ['); throw err('数组元素间缺少逗号'); }
+          }
+          return arr;
+        }
+        if (c === '{') {
+          i++;
+          var obj = {};
+          ws();
+          if (text[i] === '}') { i++; return obj; }
+          for (;;) {
+            ws();
+            if (text[i] === '}') { i++; break; }
+            var keys = parseKeySeq('}');
+            ws();
+            if (text[i] !== '=') throw err('内联表缺少 =');
+            i++; ws();
+            var v = parseValue();
+            tSet(obj, keys, v, false);
+            ws();
+            if (text[i] === ',') { i++; continue; }
+            if (text[i] === '}') { i++; break; }
+            throw err('内联表语法错误');
+          }
+          return obj;
+        }
+        var tok = readBareToken();
+        if (tok === 'true') return true;
+        if (tok === 'false') return false;
+        if (tok === 'inf' || tok === '+inf') return Infinity;
+        if (tok === '-inf') return -Infinity;
+        if (tok === 'nan' || tok === '+nan' || tok === '-nan') return NaN;
+        if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}/.test(tok)) return tok; /* 日期/时间 → 字符串 */
+        if (/^[-+]?0x[0-9a-fA-F_]+$/.test(tok)) return parseInt(tok.replace(/[-+]?/, '').replace(/^0[xX]/, ''), 16);
+        if (/^[-+]?0[oO][0-7_]+$/.test(tok)) return parseInt(tok.replace(/^[-+]?0[oO]/, ''), 8);
+        if (/^[-+]?0[bB][01_]+$/.test(tok)) return parseInt(tok.replace(/^[-+]?0[bB]/, ''), 2);
+        var num = tok.replace(/_/g, '');
+        if (/^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/.test(num)) return Number(num);
+        throw err('无法识别的值: ' + tok);
+      }
+      function parseKeySeq() {
+        var keys = [];
+        for (;;) {
+          ws();
+          var c = text[i];
+          if (c === '"' || c === "'") { keys.push(readStr()); }
+          else {
+            var m = /^[A-Za-z0-9_-]+/.exec(text.slice(i, i + 400));
+            if (!m) throw err('非法的 key');
+            keys.push(m[0]); i += m[0].length;
+          }
+          ws();
+          if (text[i] === '.') { i++; continue; }
+          break;
+        }
+        return keys;
+      }
+      function ensureTable(rootObj, keys, at) {
+        var o = rootObj;
+        for (var k = 0; k < keys.length; k++) {
+          var key = keys[k];
+          if (!(key in o)) o[key] = {};
+          var v = o[key];
+          if (Array.isArray(v)) { if (v.length === 0) throw err('key "' + key + '" 不是表', at); o = v[v.length - 1]; }
+          else if (v && typeof v === 'object') o = v;
+          else throw err('key "' + key + '" 已存在且不是表', at);
+        }
+        return o;
+      }
+      function tSet(base, keys, v, allowDupCheck) {
+        if (keys.length === 1) {
+          if (allowDupCheck && keys[0] in base) throw err('key "' + keys[0] + '" 重复定义');
+          base[keys[0]] = v;
+          return;
+        }
+        var parent = ensureTable(base, keys.slice(0, -1));
+        var last = keys[keys.length - 1];
+        if (allowDupCheck && last in parent) throw err('key "' + last + '" 重复定义');
+        parent[last] = v;
+      }
+      function pushArrayTable(keys) {
+        var parent = ensureTable(root, keys.slice(0, -1));
+        var last = keys[keys.length - 1];
+        if (!(last in parent)) parent[last] = [];
+        else if (!Array.isArray(parent[last])) throw err('"' + last + '" 不是数组表');
+        var t = {};
+        parent[last].push(t);
+        return t;
+      }
+      for (;;) {
+        ws();
+        if (i >= n) break;
+        var c = text[i];
+        if (c === '\n') { i++; continue; }
+        if (c === '#') { toLineEnd(); continue; }
+        if (c === '[') {
+          var at = i;
+          var isArray = text[i + 1] === '[';
+          i += isArray ? 2 : 1;
+          var keys = parseKeySeq();
+          if (text[i] !== ']') throw err('缺少 ]', at);
+          i++;
+          if (isArray) {
+            if (text[i] !== ']') throw err('数组表缺少第二个 ]', at);
+            i++;
+            cur = pushArrayTable(keys);
+          } else {
+            cur = ensureTable(root, keys, at);
+          }
+          expectLineEnd();
+          continue;
+        }
+        var keys2 = parseKeySeq();
+        ws();
+        if (text[i] !== '=') throw err('缺少 =');
+        i++; ws();
+        var v2 = parseValue();
+        tSet(cur, keys2, v2, true);
+        expectLineEnd();
+      }
+      return root;
+    }
+
     /* ================= actions ================= */
     function run(action) {
       if (action === 'swap') { var t = $in.value; $in.value = $out.value; $out.value = t; show(''); return; }
       if (action === 'clear') { $in.value = ''; $out.value = ''; show(''); return; }
       try {
-        var data = parse(), r = '', note = '';
+        var text = $in.value.replace(/^\uFEFF/, '').trim();
+        if (!text) throw new Error('输入为空，请粘贴 JSON / YAML / TOML');
+        var ind = $indent.value === 'tab' ? '\t' : Number($indent.value);
+        var r = '', note = '', data;
         if (action === 'fmt') {
-          var ind = $indent.value === 'tab' ? '\t' : Number($indent.value);
-          r = JSON.stringify(data, null, ind);
+          r = JSON.stringify(JSON.parse(text), null, ind);
           note = '格式化 · 输出 ' + r.length + ' 字符';
         } else if (action === 'min') {
-          r = JSON.stringify(data);
+          r = JSON.stringify(JSON.parse(text));
           note = '压缩 · 输出 ' + r.length + ' 字符';
-        } else if (action === 'yaml') {
+        } else if (action === 'toYaml') {
+          data = JSON.parse(text);
           r = jsonToYaml(data, 0) + '\n';
           note = 'JSON → YAML · 输出 ' + r.length + ' 字符';
-        } else if (action === 'toml') {
+        } else if (action === 'toToml') {
+          data = JSON.parse(text);
           if (data === null || typeof data !== 'object' || Array.isArray(data))
             throw new Error('TOML 需要 JSON 对象作为根节点');
           nullDropped = 0;
           r = tomlBody(data, '') + '\n';
           note = 'JSON → TOML · 输出 ' + r.length + ' 字符';
           if (nullDropped > 0) note += '；已忽略 ' + nullDropped + ' 个 null（TOML 无 null）';
+          $out.value = r;
+          show(note, 'warn');
+          return;
+        } else if (action === 'y2j') {
+          data = parseYaml(text);
+          r = JSON.stringify(data, null, ind);
+          note = 'YAML → JSON · 输出 ' + r.length + ' 字符';
+        } else if (action === 't2j') {
+          data = parseToml(text);
+          r = JSON.stringify(data, null, ind);
+          note = 'TOML → JSON · 输出 ' + r.length + ' 字符';
         }
         $out.value = r;
-        if (action === 'toml' && nullDropped > 0) show(note, 'warn');
-        else show(note);
+        show(note);
       } catch (e) {
         $out.value = '';
         show('错误: ' + (e && e.message ? e.message : String(e)), 'err');
@@ -274,6 +834,32 @@
         document.body.removeChild(ta);
       }
     });
+
+    /* ? 角标：悬停显示说明；点击可“钉住”；点外部/Esc 关闭 */
+    (function () {
+      var btn = document.getElementById('helpBtn');
+      var pop = document.getElementById('helpPop');
+      if (!btn || !pop) return;
+      var pinned = false;
+      function showPop(v) {
+        pop.classList.toggle('show', v);
+        btn.setAttribute('aria-expanded', v ? 'true' : 'false');
+      }
+      btn.addEventListener('mouseenter', function () { showPop(true); });
+      btn.addEventListener('mouseleave', function () { if (!pinned) showPop(false); });
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        pinned = !pinned;
+        showPop(pinned);
+      });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pinned = !pinned; showPop(pinned); }
+        else if (e.key === 'Escape') { pinned = false; showPop(false); }
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target !== btn && !pop.contains(e.target)) { pinned = false; showPop(false); }
+      });
+    })();
   })();
   </script>
 </body>
